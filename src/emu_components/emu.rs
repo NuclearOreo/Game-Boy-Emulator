@@ -1,5 +1,6 @@
 use crate::emu_components::cpu::{cpu_init, cpu_step};
 use sdl2;
+use sdl2_sys::SDL_Delay;
 
 pub struct EmuContext {
     paused: bool,
@@ -18,7 +19,9 @@ pub fn emu_get_context() -> &'static mut EmuContext {
 }
 
 fn delay(ms: u32) {
-    todo!()
+    unsafe {
+        SDL_Delay(ms);
+    }
 }
 
 pub fn emu_run(args: Vec<String>) {
