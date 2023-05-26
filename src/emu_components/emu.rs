@@ -18,7 +18,7 @@ pub fn emu_get_context() -> &'static mut EmuContext {
 }
 
 fn delay(ms: u32) {
-    todo!();
+    todo!()
 }
 
 pub fn emu_run(args: Vec<String>) {
@@ -33,9 +33,9 @@ pub fn emu_run(args: Vec<String>) {
 
     println!("Cart Loaded..");
 
-    sdl2::init().expect("Expecting SDL2 to work");
+    let mut sdl = sdl2::init().expect("Expecting SDL2 to work");
     println!("SDL INIT");
-    sdl2::ttf::init().expect("Expecting SDL2 ttf to work");
+    let _ = sdl2::ttf::init().expect("Expecting SDL2 ttf to work");
     println!("TTF INIT");
 
     cpu_init();
