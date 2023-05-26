@@ -35,7 +35,7 @@ pub fn emu_run(args: Vec<String>) {
 
     sdl2::init().expect("Expecting SDL2 to work");
     println!("SDL INIT");
-    // sdl2::ttf::init().expect("Expecting SDL2 ttf to work");
+    sdl2::ttf::init().expect("Expecting SDL2 ttf to work");
     println!("TTF INIT");
 
     cpu_init();
@@ -53,6 +53,7 @@ pub fn emu_run(args: Vec<String>) {
 
             if !cpu_step() {
                 println!("CPU Stopped");
+                return;
             }
 
             CTX.ticks += 1;
