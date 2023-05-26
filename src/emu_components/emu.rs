@@ -36,7 +36,7 @@ pub fn emu_run(args: Vec<String>) {
 
     println!("Cart Loaded..");
 
-    let mut sdl = sdl2::init().expect("Expecting SDL2 to work");
+    let _ = sdl2::init().expect("Expecting SDL2 to work");
     println!("SDL INIT");
     let _ = sdl2::ttf::init().expect("Expecting SDL2 ttf to work");
     println!("TTF INIT");
