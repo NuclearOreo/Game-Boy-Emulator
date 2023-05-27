@@ -1,7 +1,8 @@
-use std::collections::HashMap;
+use std::fs::File;
+use std::io::prelude::*;
 
 #[derive(Debug)]
-struct RomHeader {
+pub struct RomHeader {
     entry: [u8; 4],
     logo: [u8; 0x30],
     title: [u8; 16],
@@ -18,18 +19,32 @@ struct RomHeader {
 }
 
 #[derive(Debug)]
-struct CartContext {
-    filename: [u8; 1024],
-    rom_size: u32,
-    rom_data: *mut u8,
-    header: *mut RomHeader,
+pub struct CartContext {
+    pub filename: String,
+    pub rom_size: u64,
+    pub rom_data: Vec<u8>,
+    pub header: RomHeader,
 }
 
 static mut CTX: CartContext = CartContext {
-    filename: [0; 1024],
+    filename: String::new(),
     rom_size: 0,
-    rom_data: std::ptr::null_mut(),
-    header: std::ptr::null_mut(),
+    rom_data: Vec::new(),
+    header: RomHeader {
+        entry: [0; 4],
+        logo: [0; 48],
+        title: [0; 16],
+        new_lic_code: 0,
+        sgb_flag: 0,
+        c_type: 0,
+        rom_size: 0,
+        ram_size: 0,
+        dest_code: 0,
+        lic_code: 0,
+        version: 0,
+        checksum: 0,
+        global_checksum: 0,
+    },
 };
 
 static ROM_TYPES: [&str; 35] = [
@@ -138,5 +153,30 @@ fn LIC_CODE(code: u32) -> String {
     match lic_code.iter().find(|(lic_code, _)| lic_code == &code) {
         Some((_, string)) => string.to_string(),
         None => "UNKNOWN".to_string(),
+    }
+}
+
+pub fn cart_get_context() -> &'static mut CartContext {
+    unsafe { &mut CTX }
+}
+
+pub fn cart_load(cart: String) {
+    unsafe {
+        CTX.filename = cart.to_owned();
+
+        let mut fp = File::open(&CTX.filename).expect(&format!("Failed to open: {}", cart)[..]);
+
+        println!("Opened: {}", &CTX.filename);
+
+        let rom_size = fp.metadata().expect("Expected to grab metadata").len();
+        CTX.rom_size = rom_size;
+
+        let mut rom_in_memory = Vec::new();
+        fp.read_to_end(&mut rom_in_memory)
+            .expect("Expected to read entire ROM");
+
+        CTX.rom_data = rom_in_memory.to_owned();
+
+        println!("Cartridge Loaded:");
     }
 }

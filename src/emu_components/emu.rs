@@ -1,3 +1,4 @@
+use crate::emu_components::cart::cart_load;
 use crate::emu_components::cpu::{cpu_init, cpu_step};
 use sdl2;
 use sdl2_sys::SDL_Delay;
@@ -30,11 +31,7 @@ pub fn emu_run(args: Vec<String>) {
     }
 
     let rom_file = &args[1];
-    if rom_file.len() == 0 {
-        panic!("Failed to load ROM file: {}", rom_file);
-    }
-
-    println!("Cart Loaded..");
+    cart_load(rom_file.to_owned());
 
     let _ = sdl2::init().expect("Expecting SDL2 to work");
     println!("SDL INIT");
