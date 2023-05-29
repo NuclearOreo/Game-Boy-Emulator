@@ -156,15 +156,11 @@ fn LIC_CODE(code: u16) -> String {
     }
 }
 
-pub fn cart_get_context() -> &'static mut CartContext {
-    unsafe { &mut CTX }
-}
-
 pub fn cart_load(cart: String) {
     unsafe {
         CTX.filename = cart.to_owned();
 
-        let mut fp = File::open(&CTX.filename).expect(&format!("Failed to open: {}", cart)[..]);
+        let mut fp = File::open(&CTX.filename).expect("Failed to open Cart");
 
         println!("Opened: {}", &CTX.filename);
 
