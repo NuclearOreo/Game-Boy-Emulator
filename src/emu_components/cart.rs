@@ -1,3 +1,4 @@
+use crate::emu_components::common::convert_to_u16;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -156,6 +157,20 @@ fn LIC_CODE(code: u16) -> String {
     }
 }
 
+fn populate_header() {
+    unsafe {
+        CTX.header.entry.copy_from_slice(&CTX.rom_data[256..260]);
+        CTX.header.logo.copy_from_slice(&CTX.rom_data[260..308]);
+        CTX.header
+            .title
+            .copy_from_slice(&CTX.rom_data[0x134..=0x143]);
+        CTX.header.title[15] = 0;
+        CTX.header.new_lic_code = convert_to_u16(CTX.rom_data[324], CTX.rom_data[325]);
+        CTX.header.sgb_flag = CTX.rom_data[326];
+        CTX.header.c_type = CTX.rom_data[326]
+    }
+}
+
 pub fn cart_load(cart: String) {
     unsafe {
         CTX.filename = cart.to_owned();
@@ -173,19 +188,11 @@ pub fn cart_load(cart: String) {
 
         CTX.rom_data = rom_in_memory.to_owned();
 
-        let title = &CTX.rom_data[308..324];
-
-        let (a, b) = (CTX.rom_data[325], CTX.rom_data[326]);
-
-        let c = (a as u16) << 8 | b as u16;
-
-        let name = String::from_utf8_lossy(title);
+        populate_header();
 
         println!();
-        println!("{:?}", title);
-        println!("{:?}", title.len());
-        println!("{:?}", name);
-        println!("{}", LIC_CODE(c));
+        println!("\t{:?}", CTX.header.new_lic_code);
+        println!("\t{:?}", String::from_utf8_lossy(&CTX.header.title));
         println!();
 
         println!("Cartridge Loaded:");

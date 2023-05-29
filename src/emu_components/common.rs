@@ -17,3 +17,7 @@ pub fn bit_set(a: &mut u32, n: u32, on: bool) {
 pub fn between(a: u32, b: u32, c: u32) -> bool {
     a >= b && a <= c
 }
+
+pub fn convert_to_u16(a: u8, b: u8) -> u16 {
+    ((a as u16) << 8) | (b as u16)
+}
