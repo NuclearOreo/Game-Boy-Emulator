@@ -4,7 +4,7 @@ use std::io::prelude::*;
 #[derive(Debug)]
 pub struct RomHeader {
     entry: [u8; 4],
-    logo: [u8; 0x30],
+    logo: [u8; 48],
     title: [u8; 16],
     new_lic_code: u16,
     sgb_flag: u8,
@@ -85,7 +85,7 @@ static ROM_TYPES: [&str; 35] = [
     "MBC7+SENSOR+RUMBLE+RAM+BATTERY",
 ];
 
-fn LIC_CODE(code: u32) -> String {
+fn LIC_CODE(code: u16) -> String {
     let lic_code = vec![
         (0x00, "None"),
         (0x01, "Nintendo R&D1"),
@@ -176,6 +176,21 @@ pub fn cart_load(cart: String) {
             .expect("Expected to read entire ROM");
 
         CTX.rom_data = rom_in_memory.to_owned();
+
+        let title = &CTX.rom_data[308..324];
+
+        let (a, b) = (CTX.rom_data[325], CTX.rom_data[326]);
+
+        let c = (a as u16) << 8 | b as u16;
+
+        let name = String::from_utf8_lossy(title);
+
+        println!();
+        println!("{:?}", title);
+        println!("{:?}", title.len());
+        println!("{:?}", name);
+        println!("{}", LIC_CODE(c));
+        println!();
 
         println!("Cartridge Loaded:");
     }
