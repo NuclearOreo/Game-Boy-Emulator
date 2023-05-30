@@ -1,4 +1,5 @@
 use crate::emu_components::common::convert_to_u16;
+use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -7,6 +8,8 @@ pub struct RomHeader {
     entry: [u8; 4],
     logo: [u8; 48],
     title: [u8; 16],
+    manufacturer_code: [u8; 4],
+    cgb_flag: u8,
     new_lic_code: u16,
     sgb_flag: u8,
     c_type: u8,
@@ -36,6 +39,8 @@ static mut CTX: CartContext = CartContext {
         logo: [0; 48],
         title: [0; 16],
         new_lic_code: 0,
+        manufacturer_code: [0; 4],
+        cgb_flag: 0,
         sgb_flag: 0,
         c_type: 0,
         rom_size: 0,
@@ -86,7 +91,7 @@ static ROM_TYPES: [&str; 35] = [
     "MBC7+SENSOR+RUMBLE+RAM+BATTERY",
 ];
 
-fn LIC_CODE(code: u16) -> String {
+fn lic_code(code: u8) -> String {
     let lic_code = vec![
         (0x00, "None"),
         (0x01, "Nintendo R&D1"),
@@ -159,42 +164,78 @@ fn LIC_CODE(code: u16) -> String {
 
 fn populate_header() {
     unsafe {
-        CTX.header.entry.copy_from_slice(&CTX.rom_data[256..260]);
-        CTX.header.logo.copy_from_slice(&CTX.rom_data[260..308]);
+        CTX.header
+            .entry
+            .copy_from_slice(&CTX.rom_data[0x100..=0x103]);
+        CTX.header
+            .logo
+            .copy_from_slice(&CTX.rom_data[0x104..=0x133]);
         CTX.header
             .title
             .copy_from_slice(&CTX.rom_data[0x134..=0x143]);
-        CTX.header.title[15] = 0;
-        CTX.header.new_lic_code = convert_to_u16(CTX.rom_data[324], CTX.rom_data[325]);
-        CTX.header.sgb_flag = CTX.rom_data[326];
-        CTX.header.c_type = CTX.rom_data[326]
+        CTX.header
+            .manufacturer_code
+            .copy_from_slice(&CTX.rom_data[0x13F..=0x142]);
+        CTX.header.cgb_flag = CTX.rom_data[0x143];
+        CTX.header.new_lic_code = convert_to_u16(CTX.rom_data[0x144], CTX.rom_data[0x145]);
+        CTX.header.sgb_flag = CTX.rom_data[0x146];
+        CTX.header.c_type = CTX.rom_data[0x147];
+        CTX.header.rom_size = CTX.rom_data[0x148];
+        CTX.header.ram_size = CTX.rom_data[0x149];
+        CTX.header.dest_code = CTX.rom_data[0x14A];
+        CTX.header.lic_code = CTX.rom_data[0x14B];
+        CTX.header.version = CTX.rom_data[0x14C];
+        CTX.header.checksum = CTX.rom_data[0x14D];
+        CTX.header.global_checksum = convert_to_u16(CTX.rom_data[0x14E], CTX.rom_data[0x14F])
     }
 }
 
-pub fn cart_load(cart: String) {
+pub fn cart_load(cart: String) -> Result<(), Box<dyn Error>> {
     unsafe {
         CTX.filename = cart.to_owned();
 
-        let mut fp = File::open(&CTX.filename).expect("Failed to open Cart");
+        let mut fp = File::open(&CTX.filename)?;
 
         println!("Opened: {}", &CTX.filename);
 
-        let rom_size = fp.metadata().expect("Expected to grab metadata").len();
+        let rom_size = fp.metadata()?.len();
         CTX.rom_size = rom_size;
 
         let mut rom_in_memory = Vec::new();
-        fp.read_to_end(&mut rom_in_memory)
-            .expect("Expected to read entire ROM");
+        fp.read_to_end(&mut rom_in_memory)?;
 
         CTX.rom_data = rom_in_memory.to_owned();
+        println!("Cartridge Loaded:");
 
         populate_header();
+        println!(
+            "\t Title    : {}",
+            String::from_utf8_lossy(&CTX.header.title)
+        );
+        println!(
+            "\t Type     : {} ({})",
+            CTX.header.c_type, ROM_TYPES[CTX.header.c_type as usize]
+        );
+        println!("\t ROM Size : {} KB", 32 << CTX.header.rom_size);
+        println!("\t RAM Size : {}", CTX.header.ram_size);
+        println!(
+            "\t LIC Code : {} {}",
+            CTX.header.lic_code,
+            lic_code(CTX.header.lic_code)
+        );
+        println!("\t ROM Vers : {}", CTX.header.version);
 
-        println!();
-        println!("\t{:?}", CTX.header.new_lic_code);
-        println!("\t{:?}", String::from_utf8_lossy(&CTX.header.title));
-        println!();
+        let mut x: u16 = 0;
+        for i in 0x134..=0x14C {
+            x = x.wrapping_sub(CTX.rom_data[i] as u16).wrapping_sub(1);
+        }
 
-        println!("Cartridge Loaded:");
+        println!(
+            "\t Checksum : {:#x} ({})",
+            CTX.header.checksum,
+            if (x & 0xFF) > 0 { "PASSED" } else { "FAILED" }
+        );
+
+        Ok(())
     }
 }

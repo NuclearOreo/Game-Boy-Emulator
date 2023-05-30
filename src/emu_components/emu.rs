@@ -9,6 +9,17 @@ pub struct EmuContext {
     ticks: u64,
 }
 
+/*
+  Emu components:
+
+  |Cart|
+  |CPU|
+  |Address Bus|
+  |PPU|
+  |Timer|
+
+*/
+
 static mut CTX: EmuContext = EmuContext {
     paused: false,
     running: false,
@@ -27,11 +38,14 @@ fn delay(ms: u32) {
 
 pub fn emu_run(args: Vec<String>) {
     if args.len() < 2 {
-        panic!("Usage: emu <rom_file>");
+        println!("Usage: emu <rom_file>");
+        return;
     }
 
     let rom_file = &args[1];
-    cart_load(rom_file.to_owned());
+    cart_load(rom_file.to_owned()).expect("Failed to load cart");
+
+    println!("Cart loaded..");
 
     let _ = sdl2::init().expect("Expecting SDL2 to work");
     println!("SDL INIT");
