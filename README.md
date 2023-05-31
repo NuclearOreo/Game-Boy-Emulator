@@ -4,6 +4,7 @@ My attempt to create a Gameboy Emulator with Rust
 - [Playlist](https://www.youtube.com/playlist?list=PLVxiWMqQvhg_yk4qy2cSC3457wZJga_e5)
 - [Reference Repo](https://github.com/rockytriton/LLD_gbemu)
 - [Pan Docs](https://gbdev.io/pandocs/About.html)
+- [Gameboy Op Codes](https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html)
 
 ## Prerequisite
 
