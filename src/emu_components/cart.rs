@@ -239,3 +239,11 @@ pub fn cart_load(cart: String) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
 }
+
+pub fn cart_read(address: usize) -> u8 {
+    unsafe { CTX.rom_data[address] }
+}
+
+pub fn cart_write(address: usize, value: u8) {
+    panic!("Cart Write not implemented")
+}
