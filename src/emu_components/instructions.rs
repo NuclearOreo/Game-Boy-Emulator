@@ -100,7 +100,7 @@ enum CondType {
     CT_C,
 }
 
-struct Instruction {
+pub struct Instruction {
     i_type: InType,
     mode: AddrMode,
     reg_1: RegType,

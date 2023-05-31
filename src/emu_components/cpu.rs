@@ -1,3 +1,5 @@
+use crate::emu_components::instructions::Instruction;
+
 struct cpu_registers {
     a: u8,
     f: u8,
@@ -21,6 +23,8 @@ struct cpu_context {
 
     halted: bool,
     stepping: bool,
+
+    cur_inst: Instruction,
 }
 
 pub fn cpu_init() {}
