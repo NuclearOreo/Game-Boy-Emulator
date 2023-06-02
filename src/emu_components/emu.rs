@@ -3,6 +3,7 @@ use crate::emu_components::cpu::{cpu_init, cpu_step};
 use sdl2;
 use sdl2_sys::SDL_Delay;
 
+#[derive(Debug)]
 pub struct EmuContext {
     paused: bool,
     running: bool,

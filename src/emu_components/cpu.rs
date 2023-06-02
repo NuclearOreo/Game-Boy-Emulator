@@ -1,5 +1,6 @@
 use crate::emu_components::instructions::Instruction;
 
+#[derive(Debug)]
 struct cpu_registers {
     a: u8,
     f: u8,
@@ -13,6 +14,7 @@ struct cpu_registers {
     sp: u16,
 }
 
+#[derive(Debug)]
 struct cpu_context {
     regs: cpu_registers,
 

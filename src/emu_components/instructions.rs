@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, Copy)]
 enum AddrMode {
     AM_IMP,
     AM_R_D16,
@@ -22,6 +23,7 @@ enum AddrMode {
     AM_R_A16,
 }
 
+#[derive(Debug, Clone, Copy)]
 enum RegType {
     RT_NONE,
     RT_A,
@@ -40,6 +42,7 @@ enum RegType {
     RT_PC,
 }
 
+#[derive(Debug, Clone, Copy)]
 enum InType {
     IN_NONE,
     IN_NOP,
@@ -92,6 +95,7 @@ enum InType {
     IN_SET,
 }
 
+#[derive(Debug, Clone, Copy)]
 enum CondType {
     CT_NONE,
     CT_NZ,
@@ -100,6 +104,7 @@ enum CondType {
     CT_C,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Instruction {
     i_type: InType,
     mode: AddrMode,
@@ -107,4 +112,17 @@ pub struct Instruction {
     reg_2: RegType,
     cond: CondType,
     param: u8,
+}
+
+static mut instructions: [Instruction; 0x100] = [Instruction {
+    i_type: InType::IN_NONE,
+    mode: AddrMode::AM_IMP,
+    reg_1: RegType::RT_NONE,
+    reg_2: RegType::RT_NONE,
+    cond: CondType::CT_NONE,
+    param: 0,
+}; 0x100];
+
+fn get_instructions() -> &'static mut [Instruction; 0x100] {
+    unsafe { &mut instructions }
 }
