@@ -162,80 +162,85 @@ fn lic_code(code: u8) -> String {
     }
 }
 
-fn populate_header() {
-    unsafe {
-        CTX.header
-            .entry
-            .copy_from_slice(&CTX.rom_data[0x100..=0x103]);
-        CTX.header
-            .logo
-            .copy_from_slice(&CTX.rom_data[0x104..=0x133]);
-        CTX.header
-            .title
-            .copy_from_slice(&CTX.rom_data[0x134..=0x143]);
-        CTX.header
-            .manufacturer_code
-            .copy_from_slice(&CTX.rom_data[0x13F..=0x142]);
-        CTX.header.cgb_flag = CTX.rom_data[0x143];
-        CTX.header.new_lic_code = convert_to_u16(CTX.rom_data[0x144], CTX.rom_data[0x145]);
-        CTX.header.sgb_flag = CTX.rom_data[0x146];
-        CTX.header.c_type = CTX.rom_data[0x147];
-        CTX.header.rom_size = CTX.rom_data[0x148];
-        CTX.header.ram_size = CTX.rom_data[0x149];
-        CTX.header.dest_code = CTX.rom_data[0x14A];
-        CTX.header.lic_code = CTX.rom_data[0x14B];
-        CTX.header.version = CTX.rom_data[0x14C];
-        CTX.header.checksum = CTX.rom_data[0x14D];
-        CTX.header.global_checksum = convert_to_u16(CTX.rom_data[0x14E], CTX.rom_data[0x14F])
-    }
+unsafe fn populate_header() {
+    CTX.header
+        .entry
+        .copy_from_slice(&CTX.rom_data[0x100..=0x103]);
+    CTX.header
+        .logo
+        .copy_from_slice(&CTX.rom_data[0x104..=0x133]);
+    CTX.header
+        .title
+        .copy_from_slice(&CTX.rom_data[0x134..=0x143]);
+    CTX.header
+        .manufacturer_code
+        .copy_from_slice(&CTX.rom_data[0x13F..=0x142]);
+    CTX.header.cgb_flag = CTX.rom_data[0x143];
+    CTX.header.new_lic_code = convert_to_u16(CTX.rom_data[0x144], CTX.rom_data[0x145]);
+    CTX.header.sgb_flag = CTX.rom_data[0x146];
+    CTX.header.c_type = CTX.rom_data[0x147];
+    CTX.header.rom_size = CTX.rom_data[0x148];
+    CTX.header.ram_size = CTX.rom_data[0x149];
+    CTX.header.dest_code = CTX.rom_data[0x14A];
+    CTX.header.lic_code = CTX.rom_data[0x14B];
+    CTX.header.version = CTX.rom_data[0x14C];
+    CTX.header.checksum = CTX.rom_data[0x14D];
+    CTX.header.global_checksum = convert_to_u16(CTX.rom_data[0x14E], CTX.rom_data[0x14F])
 }
 
-pub fn cart_load(cart: String) -> Result<(), Box<dyn Error>> {
-    unsafe {
-        CTX.filename = cart.to_owned();
+pub unsafe fn cart_load(cart: String) -> Result<(), Box<dyn Error>> {
+    CTX.filename = cart.to_owned();
 
-        let mut fp = File::open(&CTX.filename)?;
+    let mut fp = File::open(&CTX.filename)?;
 
-        println!("Opened: {}", &CTX.filename);
+    println!("Opened: {}", &CTX.filename);
 
-        let rom_size = fp.metadata()?.len();
-        CTX.rom_size = rom_size;
+    let rom_size = fp.metadata()?.len();
+    CTX.rom_size = rom_size;
 
-        let mut rom_in_memory = Vec::new();
-        fp.read_to_end(&mut rom_in_memory)?;
+    let mut rom_in_memory = Vec::new();
+    fp.read_to_end(&mut rom_in_memory)?;
 
-        CTX.rom_data = rom_in_memory.to_owned();
-        println!("Cartridge Loaded:");
+    CTX.rom_data = rom_in_memory.to_owned();
+    println!("Cartridge Loaded:");
 
-        populate_header();
-        println!(
-            "\t Title    : {}",
-            String::from_utf8_lossy(&CTX.header.title)
-        );
-        println!(
-            "\t Type     : {} ({})",
-            CTX.header.c_type, ROM_TYPES[CTX.header.c_type as usize]
-        );
-        println!("\t ROM Size : {} KB", 32 << CTX.header.rom_size);
-        println!("\t RAM Size : {}", CTX.header.ram_size);
-        println!(
-            "\t LIC Code : {} {}",
-            CTX.header.lic_code,
-            lic_code(CTX.header.lic_code)
-        );
-        println!("\t ROM Vers : {}", CTX.header.version);
+    populate_header();
+    println!(
+        "\t Title    : {}",
+        String::from_utf8_lossy(&CTX.header.title)
+    );
+    println!(
+        "\t Type     : {} ({})",
+        CTX.header.c_type, ROM_TYPES[CTX.header.c_type as usize]
+    );
+    println!("\t ROM Size : {} KB", 32 << CTX.header.rom_size);
+    println!("\t RAM Size : {}", CTX.header.ram_size);
+    println!(
+        "\t LIC Code : {} {}",
+        CTX.header.lic_code,
+        lic_code(CTX.header.lic_code)
+    );
+    println!("\t ROM Vers : {}", CTX.header.version);
 
-        let mut x: u16 = 0;
-        for i in 0x134..=0x14C {
-            x = x.wrapping_sub(CTX.rom_data[i] as u16).wrapping_sub(1);
-        }
-
-        println!(
-            "\t Checksum : {:#x} ({})",
-            CTX.header.checksum,
-            if (x & 0xFF) > 0 { "PASSED" } else { "FAILED" }
-        );
-
-        Ok(())
+    let mut x: u16 = 0;
+    for i in 0x134..=0x14C {
+        x = x.wrapping_sub(CTX.rom_data[i] as u16).wrapping_sub(1);
     }
+
+    println!(
+        "\t Checksum : {:#x} ({})",
+        CTX.header.checksum,
+        if (x & 0xFF) > 0 { "PASSED" } else { "FAILED" }
+    );
+
+    Ok(())
+}
+
+pub unsafe fn cart_read(address: u16) -> u8 {
+    let address = address as usize;
+    CTX.rom_data[address]
+}
+
+pub fn cart_write(address: u16, value: u8) {
+    panic!("Cart Write not implemented")
 }
