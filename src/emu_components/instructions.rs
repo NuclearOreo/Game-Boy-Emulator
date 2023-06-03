@@ -144,6 +144,30 @@ pub fn set_instuctions() {
             reg_2: RegType::RT_NONE,
             cond: CondType::CT_NONE,
             param: 0,
-        }
+        };
+        instructions[0xAF] = Instruction {
+            i_type: InType::IN_LD,
+            mode: AddrMode::AM_R_D8,
+            reg_1: RegType::RT_C,
+            reg_2: RegType::RT_NONE,
+            cond: CondType::CT_NONE,
+            param: 0,
+        };
+        instructions[0xC3] = Instruction {
+            i_type: InType::IN_JP,
+            mode: AddrMode::AM_D16,
+            reg_1: RegType::RT_NONE,
+            reg_2: RegType::RT_NONE,
+            cond: CondType::CT_NONE,
+            param: 0,
+        };
+        instructions[0xF3] = Instruction {
+            i_type: InType::IN_DI,
+            mode: AddrMode::AM_IMP,
+            reg_1: RegType::RT_NONE,
+            reg_2: RegType::RT_NONE,
+            cond: CondType::CT_NONE,
+            param: 0,
+        };
     }
 }
