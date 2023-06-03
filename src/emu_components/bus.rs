@@ -13,7 +13,7 @@ use crate::emu_components::cart::{cart_read, cart_write};
 // 0xFF00 - 0xFF7F : I/O Registers
 // 0xFF80 - 0xFFFE : Zero Page
 
-pub fn bus_read(address: u16) -> u8 {
+pub unsafe fn bus_read(address: u16) -> u8 {
     if address < 0x8000 {
         return cart_read(address);
     }

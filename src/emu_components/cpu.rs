@@ -67,46 +67,42 @@ pub unsafe fn cpu_init() {
     CTX.regs.pc = 0x100;
 }
 
-fn fetch_instruction() {
-    unsafe {
-        CTX.cur_opcode = bus_read(CTX.regs.pc);
-        CTX.regs.pc += 1;
+unsafe fn fetch_instruction() {
+    CTX.cur_opcode = bus_read(CTX.regs.pc);
+    CTX.regs.pc += 1;
 
-        CTX.cur_inst = match instruction_by_opcode(CTX.cur_opcode) {
-            Some(x) => x,
-            _ => panic!("Unknown instruction: {:#x}", CTX.cur_opcode),
-        }
+    CTX.cur_inst = match instruction_by_opcode(CTX.cur_opcode) {
+        Some(x) => x,
+        _ => panic!("Unknown instruction: {:#x}", CTX.cur_opcode),
     }
 }
 
-fn fetch_data() {
-    unsafe {
-        CTX.mem_dest = 0;
-        CTX.dest_is_mem = false;
+unsafe fn fetch_data() {
+    CTX.mem_dest = 0;
+    CTX.dest_is_mem = false;
 
-        match CTX.cur_inst.mode {
-            AddrMode::AM_IMP => (),
-            AddrMode::AM_R => {
-                CTX.fetched_data = cpu_read_reg(CTX.cur_inst.reg_1);
-            }
-            AddrMode::AM_R_D8 => {
-                CTX.fetched_data = bus_read(CTX.regs.pc) as u16;
-                emu_cycles(1);
-                CTX.regs.pc += 1;
-            }
-            AddrMode::AM_D16 => {
-                let lo = bus_read(CTX.regs.pc) as u16;
-                emu_cycles(1);
-
-                let hi = bus_read(CTX.regs.pc + 1) as u16;
-                emu_cycles(1);
-
-                CTX.fetched_data = lo | (hi << 8);
-
-                CTX.regs.pc += 2;
-            }
-            _ => panic!("Unknown Addressing mode"),
+    match CTX.cur_inst.mode {
+        AddrMode::AM_IMP => (),
+        AddrMode::AM_R => {
+            CTX.fetched_data = cpu_read_reg(CTX.cur_inst.reg_1);
         }
+        AddrMode::AM_R_D8 => {
+            CTX.fetched_data = bus_read(CTX.regs.pc) as u16;
+            emu_cycles(1);
+            CTX.regs.pc += 1;
+        }
+        AddrMode::AM_D16 => {
+            let lo = bus_read(CTX.regs.pc) as u16;
+            emu_cycles(1);
+
+            let hi = bus_read(CTX.regs.pc + 1) as u16;
+            emu_cycles(1);
+
+            CTX.fetched_data = lo | (hi << 8);
+
+            CTX.regs.pc += 2;
+        }
+        _ => panic!("Unknown Addressing mode"),
     }
 }
 
@@ -134,24 +130,22 @@ fn reverse(n: u16) -> u16 {
     ((n & 0xFF00) >> 8) | ((n & 0x00FF) << 8)
 }
 
-fn cpu_read_reg(rt: RegType) -> u16 {
-    unsafe {
-        match rt {
-            RegType::RT_A => CTX.regs.a as u16,
-            RegType::RT_F => CTX.regs.f as u16,
-            RegType::RT_B => CTX.regs.b as u16,
-            RegType::RT_C => CTX.regs.c as u16,
-            RegType::RT_D => CTX.regs.d as u16,
-            RegType::RT_E => CTX.regs.e as u16,
-            RegType::RT_H => CTX.regs.h as u16,
-            RegType::RT_L => CTX.regs.l as u16,
-            RegType::RT_AF => reverse(CTX.regs.a as u16),
-            RegType::RT_BC => reverse(CTX.regs.b as u16),
-            RegType::RT_DE => reverse(CTX.regs.d as u16),
-            RegType::RT_HL => reverse(CTX.regs.h as u16),
-            RegType::RT_PC => CTX.regs.pc,
-            RegType::RT_SP => CTX.regs.sp,
-            _ => 0,
-        }
+unsafe fn cpu_read_reg(rt: RegType) -> u16 {
+    match rt {
+        RegType::RT_A => CTX.regs.a as u16,
+        RegType::RT_F => CTX.regs.f as u16,
+        RegType::RT_B => CTX.regs.b as u16,
+        RegType::RT_C => CTX.regs.c as u16,
+        RegType::RT_D => CTX.regs.d as u16,
+        RegType::RT_E => CTX.regs.e as u16,
+        RegType::RT_H => CTX.regs.h as u16,
+        RegType::RT_L => CTX.regs.l as u16,
+        RegType::RT_AF => reverse(CTX.regs.a as u16),
+        RegType::RT_BC => reverse(CTX.regs.b as u16),
+        RegType::RT_DE => reverse(CTX.regs.d as u16),
+        RegType::RT_HL => reverse(CTX.regs.h as u16),
+        RegType::RT_PC => CTX.regs.pc,
+        RegType::RT_SP => CTX.regs.sp,
+        _ => 0,
     }
 }

@@ -27,14 +27,12 @@ static mut CTX: EmuContext = EmuContext {
     ticks: 0,
 };
 
-pub fn emu_get_context() -> &'static mut EmuContext {
-    unsafe { &mut CTX }
+pub unsafe fn emu_get_context() -> &'static mut EmuContext {
+    &mut CTX
 }
 
-fn delay(ms: u32) {
-    unsafe {
-        SDL_Delay(ms);
-    }
+unsafe fn delay(ms: u32) {
+    SDL_Delay(ms);
 }
 
 pub unsafe fn emu_run(args: Vec<String>) {
