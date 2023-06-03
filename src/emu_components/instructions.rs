@@ -126,3 +126,24 @@ static mut instructions: [Instruction; 0x100] = [Instruction {
 fn get_instructions() -> &'static mut [Instruction; 0x100] {
     unsafe { &mut instructions }
 }
+
+pub fn set_instuctions() {
+    unsafe {
+        instructions[0x00] = Instruction {
+            i_type: InType::IN_NOP,
+            mode: AddrMode::AM_IMP,
+            reg_1: RegType::RT_NONE,
+            reg_2: RegType::RT_NONE,
+            cond: CondType::CT_NONE,
+            param: 0,
+        };
+        instructions[0x05] = Instruction {
+            i_type: InType::IN_DEC,
+            mode: AddrMode::AM_R,
+            reg_1: RegType::RT_B,
+            reg_2: RegType::RT_NONE,
+            cond: CondType::CT_NONE,
+            param: 0,
+        }
+    }
+}
