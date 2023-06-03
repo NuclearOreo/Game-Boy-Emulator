@@ -240,10 +240,11 @@ pub fn cart_load(cart: String) -> Result<(), Box<dyn Error>> {
     }
 }
 
-pub fn cart_read(address: usize) -> u8 {
+pub fn cart_read(address: u16) -> u8 {
+    let address = address as usize;
     unsafe { CTX.rom_data[address] }
 }
 
-pub fn cart_write(address: usize, value: u8) {
+pub fn cart_write(address: u16, value: u8) {
     panic!("Cart Write not implemented")
 }

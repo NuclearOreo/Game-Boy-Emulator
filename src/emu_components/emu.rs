@@ -37,7 +37,7 @@ fn delay(ms: u32) {
     }
 }
 
-pub fn emu_run(args: Vec<String>) {
+pub unsafe fn emu_run(args: Vec<String>) {
     if args.len() < 2 {
         println!("Usage: emu <rom_file>");
         return;
@@ -55,23 +55,25 @@ pub fn emu_run(args: Vec<String>) {
 
     cpu_init();
 
-    unsafe {
-        CTX.running = true;
-        CTX.paused = false;
-        CTX.ticks = 0;
+    CTX.running = true;
+    CTX.paused = false;
+    CTX.ticks = 0;
 
-        while CTX.running {
-            if CTX.paused {
-                delay(10);
-                continue;
-            }
-
-            if !cpu_step() {
-                println!("CPU Stopped");
-                return;
-            }
-
-            CTX.ticks += 1;
+    while CTX.running {
+        if CTX.paused {
+            delay(10);
+            continue;
         }
+
+        if !cpu_step() {
+            println!("CPU Stopped");
+            return;
+        }
+
+        CTX.ticks += 1;
     }
+}
+
+pub fn emu_cycles(cpu_cycles: i32) {
+    // todo
 }

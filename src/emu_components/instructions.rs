@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum AddrMode {
     AM_IMP,
     AM_R_D16,
@@ -23,7 +23,7 @@ pub enum AddrMode {
     AM_R_A16,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum RegType {
     RT_NONE,
     RT_A,
@@ -42,7 +42,7 @@ pub enum RegType {
     RT_PC,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum InType {
     IN_NONE,
     IN_NOP,
@@ -95,7 +95,7 @@ pub enum InType {
     IN_SET,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CondType {
     CT_NONE,
     CT_NZ,
@@ -104,7 +104,7 @@ pub enum CondType {
     CT_C,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Instruction {
     pub i_type: InType,
     pub mode: AddrMode,
@@ -165,5 +165,16 @@ pub fn set_instuctions() {
             cond: CondType::CT_NONE,
             param: 0,
         };
+    }
+}
+
+pub fn instruction_by_opcode(code: u8) -> Option<Instruction> {
+    let code = code as usize;
+    unsafe {
+        if instructions[code].i_type == InType::IN_NONE {
+            return None;
+        }
+
+        Some(instructions[code])
     }
 }
