@@ -149,3 +149,16 @@ unsafe fn cpu_read_reg(rt: RegType) -> u16 {
         _ => 0,
     }
 }
+
+pub type IN_PROC = fn(&'static mut cpu_context);
+
+fn proc_none(ctx: &'static mut cpu_context) {
+    panic!("Invalid instructions")
+}
+
+pub fn inst_get_processor(i_type: InType) -> IN_PROC {
+    match i_type {
+        InType::IN_NONE => proc_none,
+        _ => proc_none,
+    }
+}

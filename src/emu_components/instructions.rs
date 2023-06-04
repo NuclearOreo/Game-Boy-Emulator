@@ -42,7 +42,7 @@ pub enum RegType {
     RT_PC,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InType {
     IN_NONE,
     IN_NOP,
@@ -95,7 +95,7 @@ pub enum InType {
     IN_SET,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CondType {
     CT_NONE,
     CT_NZ,
