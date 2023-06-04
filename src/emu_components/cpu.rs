@@ -18,7 +18,7 @@ struct cpu_registers {
 }
 
 #[derive(Debug)]
-struct cpu_context {
+pub struct cpu_context {
     regs: cpu_registers,
 
     // Current fetch
