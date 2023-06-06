@@ -185,6 +185,7 @@ unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
 unsafe fn proc_jp(ctx: &mut cpu_context) {
     if check_cond(ctx) {
         ctx.regs.pc = ctx.fetched_data;
+        emu_cycles(1);
     }
 }
 
