@@ -1,4 +1,5 @@
 use crate::emu_components::bus::bus_read;
+use crate::emu_components::common::bit;
 use crate::emu_components::emu::emu_cycles;
 use crate::emu_components::instructions::{instruction_by_opcode, set_instuctions};
 use crate::emu_components::instructions::{AddrMode, CondType, InType, Instruction, RegType};
@@ -61,6 +62,14 @@ static mut CTX: cpu_context = cpu_context {
         param: 0,
     },
 };
+
+unsafe fn CPU_FLAG_Z() -> bool {
+    bit(CTX.regs.f, 7)
+}
+
+unsafe fn CPU_FLAG_C() -> bool {
+    bit(CTX.regs.f, 4)
+}
 
 pub unsafe fn cpu_init() {
     set_instuctions();
@@ -150,15 +159,40 @@ unsafe fn cpu_read_reg(rt: RegType) -> u16 {
     }
 }
 
-pub type IN_PROC = fn(&'static mut cpu_context);
+pub type IN_PROC = unsafe fn(&mut cpu_context);
 
-fn proc_none(ctx: &'static mut cpu_context) {
+fn proc_none(ctx: &mut cpu_context) {
     panic!("Invalid instructions")
+}
+
+fn proc_ld(ctx: &mut cpu_context) {
+    todo!();
+}
+
+unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
+    let z = CPU_FLAG_Z();
+    let c = CPU_FLAG_C();
+
+    match ctx.cur_inst.cond {
+        CondType::CT_NONE => true,
+        CondType::CT_C => c,
+        CondType::CT_NC => !c,
+        CondType::CT_Z => z,
+        CondType::CT_NZ => !z,
+    }
+}
+
+unsafe fn proc_jp(ctx: &mut cpu_context) {
+    if check_cond(ctx) {
+        ctx.regs.pc = ctx.fetched_data;
+    }
 }
 
 pub fn inst_get_processor(i_type: InType) -> IN_PROC {
     match i_type {
         InType::IN_NONE => proc_none,
+        InType::IN_LD => proc_ld,
+        InType::IN_JP => proc_jp,
         _ => proc_none,
     }
 }
