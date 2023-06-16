@@ -165,6 +165,8 @@ fn proc_none(ctx: &mut cpu_context) {
     panic!("Invalid instructions")
 }
 
+fn proc_nop(ctx: &mut cpu_context) {}
+
 fn proc_ld(ctx: &mut cpu_context) {
     todo!();
 }
@@ -192,6 +194,7 @@ unsafe fn proc_jp(ctx: &mut cpu_context) {
 pub fn inst_get_processor(i_type: InType) -> IN_PROC {
     match i_type {
         InType::IN_NONE => proc_none,
+        InType::IN_NOP => proc_nop,
         InType::IN_LD => proc_ld,
         InType::IN_JP => proc_jp,
         _ => proc_none,
