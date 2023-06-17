@@ -228,7 +228,7 @@ pub unsafe fn cart_load(cart: String) -> Result<(), Box<dyn Error>> {
     }
 
     println!(
-        "\t Checksum : {:#x} ({})",
+        "\t Checksum : {:2X} ({})",
         CTX.header.checksum,
         if (x & 0xFF) > 0 { "PASSED" } else { "FAILED" }
     );

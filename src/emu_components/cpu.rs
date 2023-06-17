@@ -1,4 +1,5 @@
 use crate::emu_components::bus::bus_read;
+use crate::emu_components::common::{bit, bit_set};
 use crate::emu_components::emu::emu_cycles;
 use crate::emu_components::instructions::{instruction_by_opcode, set_instuctions};
 use crate::emu_components::instructions::{AddrMode, CondType, InType, Instruction, RegType};
@@ -18,7 +19,7 @@ struct cpu_registers {
 }
 
 #[derive(Debug)]
-struct cpu_context {
+pub struct cpu_context {
     regs: cpu_registers,
 
     // Current fetch
@@ -30,12 +31,14 @@ struct cpu_context {
     halted: bool,
     stepping: bool,
 
+    int_master_enabled: bool,
+
     cur_inst: Instruction,
 }
 
 static mut CTX: cpu_context = cpu_context {
     regs: cpu_registers {
-        a: 0,
+        a: 1,
         f: 0,
         b: 0,
         c: 0,
@@ -52,6 +55,7 @@ static mut CTX: cpu_context = cpu_context {
     cur_opcode: 0,
     halted: false,
     stepping: false,
+    int_master_enabled: true,
     cur_inst: Instruction {
         i_type: InType::IN_NONE,
         mode: AddrMode::AM_IMP,
@@ -61,6 +65,14 @@ static mut CTX: cpu_context = cpu_context {
         param: 0,
     },
 };
+
+unsafe fn CPU_FLAG_Z() -> bool {
+    bit(CTX.regs.f, 7)
+}
+
+unsafe fn CPU_FLAG_C() -> bool {
+    bit(CTX.regs.f, 4)
+}
 
 pub unsafe fn cpu_init() {
     set_instuctions();
@@ -73,7 +85,7 @@ unsafe fn fetch_instruction() {
 
     CTX.cur_inst = match instruction_by_opcode(CTX.cur_opcode) {
         Some(x) => x,
-        _ => panic!("Unknown instruction: {:#x}", CTX.cur_opcode),
+        _ => panic!("Unknown instruction: {:2X}", CTX.cur_opcode),
     }
 }
 
@@ -107,7 +119,8 @@ unsafe fn fetch_data() {
 }
 
 unsafe fn execute() {
-    println!("\tNot executing yet...");
+    let proc = inst_get_processor(CTX.cur_inst.i_type);
+    proc(&mut CTX);
 }
 
 pub unsafe fn cpu_step() -> bool {
@@ -117,8 +130,15 @@ pub unsafe fn cpu_step() -> bool {
         fetch_data();
 
         println!(
-            "Executing Instruction: {:#x}   PC: {:#x}",
-            CTX.cur_opcode, pc
+            "{:2X}: {} ({:2X}, {:2X}, {:2X}) A: {:2X} B: {:2X} C: {:2X}",
+            pc,
+            CTX.cur_inst.i_type,
+            CTX.cur_opcode,
+            bus_read(pc + 1),
+            bus_read(pc + 2),
+            CTX.regs.a,
+            CTX.regs.b,
+            CTX.regs.c
         );
 
         execute();
@@ -147,5 +167,93 @@ unsafe fn cpu_read_reg(rt: RegType) -> u16 {
         RegType::RT_PC => CTX.regs.pc,
         RegType::RT_SP => CTX.regs.sp,
         _ => 0,
+    }
+}
+
+pub type IN_PROC = unsafe fn(&mut cpu_context);
+
+fn proc_none(ctx: &mut cpu_context) {
+    panic!("Invalid instructions");
+}
+
+fn proc_unknown(ctx: &mut cpu_context) {
+    panic!("Unimplemented proc for instruction: {:2X}", ctx.cur_opcode);
+}
+
+fn proc_nop(ctx: &mut cpu_context) {}
+
+fn proc_ld(ctx: &mut cpu_context) {
+    //Todo
+}
+
+fn cpu_set_flags(
+    ctx: &mut cpu_context,
+    z: Option<bool>,
+    n: Option<bool>,
+    h: Option<bool>,
+    c: Option<bool>,
+) {
+    if let Some(z) = z {
+        bit_set(&mut ctx.regs.f, 7, z);
+    }
+
+    if let Some(n) = n {
+        bit_set(&mut ctx.regs.f, 6, n);
+    }
+
+    if let Some(h) = h {
+        bit_set(&mut ctx.regs.f, 5, h);
+    }
+
+    if let Some(c) = c {
+        bit_set(&mut ctx.regs.f, 4, c);
+    }
+}
+
+fn proc_xor(ctx: &mut cpu_context) {
+    ctx.regs.a ^= ctx.fetched_data as u8;
+
+    cpu_set_flags(
+        ctx,
+        Some(ctx.regs.a == 0),
+        Some(false),
+        Some(false),
+        Some(false),
+    )
+}
+
+unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
+    let z = CPU_FLAG_Z();
+    let c = CPU_FLAG_C();
+
+    match ctx.cur_inst.cond {
+        CondType::CT_NONE => true,
+        CondType::CT_C => c,
+        CondType::CT_NC => !c,
+        CondType::CT_Z => z,
+        CondType::CT_NZ => !z,
+    }
+}
+
+unsafe fn proc_di(ctx: &mut cpu_context) {
+    ctx.int_master_enabled = false;
+}
+
+unsafe fn proc_jp(ctx: &mut cpu_context) {
+    if check_cond(ctx) {
+        ctx.regs.pc = ctx.fetched_data;
+        emu_cycles(1);
+    }
+}
+
+pub fn inst_get_processor(i_type: InType) -> IN_PROC {
+    match i_type {
+        InType::IN_NONE => proc_none,
+        InType::IN_NOP => proc_nop,
+        InType::IN_LD => proc_ld,
+        InType::IN_JP => proc_jp,
+        InType::IN_DI => proc_di,
+        InType::IN_XOR => proc_xor,
+        _ => proc_unknown,
     }
 }

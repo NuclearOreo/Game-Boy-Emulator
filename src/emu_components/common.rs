@@ -1,12 +1,12 @@
-pub fn bit(a: u32, n: u32) -> u32 {
+pub fn bit(a: u8, n: u8) -> bool {
     if a & (1 << n) != 0 {
-        1
+        true
     } else {
-        0
+        false
     }
 }
 
-pub fn bit_set(a: &mut u32, n: u32, on: bool) {
+pub fn bit_set(a: &mut u8, n: u8, on: bool) {
     if on {
         *a |= 1 << n;
     } else {
@@ -14,7 +14,7 @@ pub fn bit_set(a: &mut u32, n: u32, on: bool) {
     }
 }
 
-pub fn between(a: u32, b: u32, c: u32) -> bool {
+pub fn between(a: u8, b: u8, c: u8) -> bool {
     a >= b && a <= c
 }
 
