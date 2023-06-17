@@ -1,7 +1,6 @@
 use crate::emu_components::bus::bus_read;
+use crate::emu_components::cpu_fetch::fetch_data;
 use crate::emu_components::cpu_proc::inst_get_processor;
-use crate::emu_components::cpu_util::cpu_read_reg;
-use crate::emu_components::emu::emu_cycles;
 use crate::emu_components::instructions::{instruction_by_opcode, set_instuctions};
 use crate::emu_components::instructions::{AddrMode, CondType, InType, Instruction, RegType};
 
@@ -83,35 +82,6 @@ unsafe fn fetch_instruction() {
     CTX.cur_inst = match instruction_by_opcode(CTX.cur_opcode) {
         Some(x) => x,
         _ => panic!("Unknown instruction: {:2X}", CTX.cur_opcode),
-    }
-}
-
-unsafe fn fetch_data() {
-    CTX.mem_dest = 0;
-    CTX.dest_is_mem = false;
-
-    match CTX.cur_inst.mode {
-        AddrMode::AM_IMP => (),
-        AddrMode::AM_R => {
-            CTX.fetched_data = cpu_read_reg(CTX.cur_inst.reg_1);
-        }
-        AddrMode::AM_R_D8 => {
-            CTX.fetched_data = bus_read(CTX.regs.pc) as u16;
-            emu_cycles(1);
-            CTX.regs.pc += 1;
-        }
-        AddrMode::AM_D16 => {
-            let lo = bus_read(CTX.regs.pc) as u16;
-            emu_cycles(1);
-
-            let hi = bus_read(CTX.regs.pc + 1) as u16;
-            emu_cycles(1);
-
-            CTX.fetched_data = lo | (hi << 8);
-
-            CTX.regs.pc += 2;
-        }
-        _ => panic!("Unknown Addressing mode"),
     }
 }
 

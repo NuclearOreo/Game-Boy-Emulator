@@ -2,6 +2,7 @@ pub mod bus;
 pub mod cart;
 pub mod common;
 pub mod cpu;
+pub mod cpu_fetch;
 pub mod cpu_proc;
 pub mod cpu_util;
 pub mod emu;
