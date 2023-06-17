@@ -147,10 +147,18 @@ pub unsafe fn set_instuctions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
-    instructions[0xAF] = Instruction {
+    instructions[0x0E] = Instruction {
         i_type: InType::IN_LD,
         mode: AddrMode::AM_R_D8,
         reg_1: RegType::RT_C,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    instructions[0xAF] = Instruction {
+        i_type: InType::IN_XOR,
+        mode: AddrMode::AM_R,
+        reg_1: RegType::RT_A,
         reg_2: RegType::RT_NONE,
         cond: CondType::CT_NONE,
         param: 0,
@@ -167,6 +175,14 @@ pub unsafe fn set_instuctions() {
         i_type: InType::IN_DI,
         mode: AddrMode::AM_IMP,
         reg_1: RegType::RT_NONE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    instructions[0x21] = Instruction {
+        i_type: InType::IN_LD,
+        mode: AddrMode::AM_IMP,
+        reg_1: RegType::RT_A,
         reg_2: RegType::RT_NONE,
         cond: CondType::CT_NONE,
         param: 0,

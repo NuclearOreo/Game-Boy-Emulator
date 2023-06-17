@@ -1,5 +1,5 @@
 use crate::emu_components::bus::bus_read;
-use crate::emu_components::common::bit;
+use crate::emu_components::common::{bit, bit_set};
 use crate::emu_components::emu::emu_cycles;
 use crate::emu_components::instructions::{instruction_by_opcode, set_instuctions};
 use crate::emu_components::instructions::{AddrMode, CondType, InType, Instruction, RegType};
@@ -31,12 +31,14 @@ pub struct cpu_context {
     halted: bool,
     stepping: bool,
 
+    int_master_enabled: bool,
+
     cur_inst: Instruction,
 }
 
 static mut CTX: cpu_context = cpu_context {
     regs: cpu_registers {
-        a: 0,
+        a: 1,
         f: 0,
         b: 0,
         c: 0,
@@ -53,6 +55,7 @@ static mut CTX: cpu_context = cpu_context {
     cur_opcode: 0,
     halted: false,
     stepping: false,
+    int_master_enabled: true,
     cur_inst: Instruction {
         i_type: InType::IN_NONE,
         mode: AddrMode::AM_IMP,
@@ -180,7 +183,43 @@ fn proc_unknown(ctx: &mut cpu_context) {
 fn proc_nop(ctx: &mut cpu_context) {}
 
 fn proc_ld(ctx: &mut cpu_context) {
-    todo!();
+    //Todo
+}
+
+fn cpu_set_flags(
+    ctx: &mut cpu_context,
+    z: Option<bool>,
+    n: Option<bool>,
+    h: Option<bool>,
+    c: Option<bool>,
+) {
+    if let Some(z) = z {
+        bit_set(&mut ctx.regs.f, 7, z);
+    }
+
+    if let Some(n) = n {
+        bit_set(&mut ctx.regs.f, 6, n);
+    }
+
+    if let Some(h) = h {
+        bit_set(&mut ctx.regs.f, 5, h);
+    }
+
+    if let Some(c) = c {
+        bit_set(&mut ctx.regs.f, 4, c);
+    }
+}
+
+fn proc_xor(ctx: &mut cpu_context) {
+    ctx.regs.a ^= ctx.fetched_data as u8;
+
+    cpu_set_flags(
+        ctx,
+        Some(ctx.regs.a == 0),
+        Some(false),
+        Some(false),
+        Some(false),
+    )
 }
 
 unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
@@ -196,6 +235,10 @@ unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
     }
 }
 
+unsafe fn proc_di(ctx: &mut cpu_context) {
+    ctx.int_master_enabled = false;
+}
+
 unsafe fn proc_jp(ctx: &mut cpu_context) {
     if check_cond(ctx) {
         ctx.regs.pc = ctx.fetched_data;
@@ -209,6 +252,8 @@ pub fn inst_get_processor(i_type: InType) -> IN_PROC {
         InType::IN_NOP => proc_nop,
         InType::IN_LD => proc_ld,
         InType::IN_JP => proc_jp,
+        InType::IN_DI => proc_di,
+        InType::IN_XOR => proc_xor,
         _ => proc_unknown,
     }
 }
