@@ -167,7 +167,7 @@ fn proc_none(ctx: &mut cpu_context) {
 }
 
 fn proc_unknown(ctx: &mut cpu_context) {
-    panic!("Unkown instructions: {:#x}", ctx.cur_opcode);
+    panic!("Unimplemented proc for instruction: {:#x}", ctx.cur_opcode);
 }
 
 fn proc_nop(ctx: &mut cpu_context) {}
