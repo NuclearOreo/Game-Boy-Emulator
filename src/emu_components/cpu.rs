@@ -1,39 +1,40 @@
 use crate::emu_components::bus::bus_read;
-use crate::emu_components::common::{bit, bit_set};
+use crate::emu_components::common::bit;
+use crate::emu_components::cpu_proc::inst_get_processor;
 use crate::emu_components::emu::emu_cycles;
 use crate::emu_components::instructions::{instruction_by_opcode, set_instuctions};
 use crate::emu_components::instructions::{AddrMode, CondType, InType, Instruction, RegType};
 
 #[derive(Debug)]
-struct cpu_registers {
-    a: u8,
-    f: u8,
-    b: u8,
-    c: u8,
-    d: u8,
-    e: u8,
-    h: u8,
-    l: u8,
-    pc: u16,
-    sp: u16,
+pub struct cpu_registers {
+    pub a: u8,
+    pub f: u8,
+    pub b: u8,
+    pub c: u8,
+    pub d: u8,
+    pub e: u8,
+    pub h: u8,
+    pub l: u8,
+    pub pc: u16,
+    pub sp: u16,
 }
 
 #[derive(Debug)]
 pub struct cpu_context {
-    regs: cpu_registers,
+    pub regs: cpu_registers,
 
     // Current fetch
-    fetched_data: u16,
-    mem_dest: u16,
-    dest_is_mem: bool,
-    cur_opcode: u8,
+    pub fetched_data: u16,
+    pub mem_dest: u16,
+    pub dest_is_mem: bool,
+    pub cur_opcode: u8,
 
-    halted: bool,
-    stepping: bool,
+    pub halted: bool,
+    pub stepping: bool,
 
-    int_master_enabled: bool,
+    pub int_master_enabled: bool,
 
-    cur_inst: Instruction,
+    pub cur_inst: Instruction,
 }
 
 static mut CTX: cpu_context = cpu_context {
@@ -65,14 +66,6 @@ static mut CTX: cpu_context = cpu_context {
         param: 0,
     },
 };
-
-unsafe fn CPU_FLAG_Z() -> bool {
-    bit(CTX.regs.f, 7)
-}
-
-unsafe fn CPU_FLAG_C() -> bool {
-    bit(CTX.regs.f, 4)
-}
 
 pub unsafe fn cpu_init() {
     set_instuctions();
@@ -146,6 +139,14 @@ pub unsafe fn cpu_step() -> bool {
     true
 }
 
+pub unsafe fn cpu_flag_z() -> bool {
+    bit(CTX.regs.f, 7)
+}
+
+pub unsafe fn cpu_flag_c() -> bool {
+    bit(CTX.regs.f, 4)
+}
+
 fn reverse(n: u16) -> u16 {
     ((n & 0xFF00) >> 8) | ((n & 0x00FF) << 8)
 }
@@ -167,93 +168,5 @@ unsafe fn cpu_read_reg(rt: RegType) -> u16 {
         RegType::RT_PC => CTX.regs.pc,
         RegType::RT_SP => CTX.regs.sp,
         _ => 0,
-    }
-}
-
-pub type IN_PROC = unsafe fn(&mut cpu_context);
-
-fn proc_none(ctx: &mut cpu_context) {
-    panic!("Invalid instructions");
-}
-
-fn proc_unknown(ctx: &mut cpu_context) {
-    panic!("Unimplemented proc for instruction: {:2X}", ctx.cur_opcode);
-}
-
-fn proc_nop(ctx: &mut cpu_context) {}
-
-fn proc_ld(ctx: &mut cpu_context) {
-    //Todo
-}
-
-fn cpu_set_flags(
-    ctx: &mut cpu_context,
-    z: Option<bool>,
-    n: Option<bool>,
-    h: Option<bool>,
-    c: Option<bool>,
-) {
-    if let Some(z) = z {
-        bit_set(&mut ctx.regs.f, 7, z);
-    }
-
-    if let Some(n) = n {
-        bit_set(&mut ctx.regs.f, 6, n);
-    }
-
-    if let Some(h) = h {
-        bit_set(&mut ctx.regs.f, 5, h);
-    }
-
-    if let Some(c) = c {
-        bit_set(&mut ctx.regs.f, 4, c);
-    }
-}
-
-fn proc_xor(ctx: &mut cpu_context) {
-    ctx.regs.a ^= ctx.fetched_data as u8;
-
-    cpu_set_flags(
-        ctx,
-        Some(ctx.regs.a == 0),
-        Some(false),
-        Some(false),
-        Some(false),
-    )
-}
-
-unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
-    let z = CPU_FLAG_Z();
-    let c = CPU_FLAG_C();
-
-    match ctx.cur_inst.cond {
-        CondType::CT_NONE => true,
-        CondType::CT_C => c,
-        CondType::CT_NC => !c,
-        CondType::CT_Z => z,
-        CondType::CT_NZ => !z,
-    }
-}
-
-unsafe fn proc_di(ctx: &mut cpu_context) {
-    ctx.int_master_enabled = false;
-}
-
-unsafe fn proc_jp(ctx: &mut cpu_context) {
-    if check_cond(ctx) {
-        ctx.regs.pc = ctx.fetched_data;
-        emu_cycles(1);
-    }
-}
-
-pub fn inst_get_processor(i_type: InType) -> IN_PROC {
-    match i_type {
-        InType::IN_NONE => proc_none,
-        InType::IN_NOP => proc_nop,
-        InType::IN_LD => proc_ld,
-        InType::IN_JP => proc_jp,
-        InType::IN_DI => proc_di,
-        InType::IN_XOR => proc_xor,
-        _ => proc_unknown,
     }
 }
