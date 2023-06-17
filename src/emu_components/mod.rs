@@ -3,6 +3,7 @@ pub mod cart;
 pub mod common;
 pub mod cpu;
 pub mod cpu_proc;
+pub mod cpu_util;
 pub mod emu;
 pub mod instructions;
 pub mod ppu;

@@ -1,27 +1,27 @@
 use crate::emu_components::common::bit_set;
-use crate::emu_components::cpu::cpu_context;
-use crate::emu_components::cpu::{cpu_flag_c, cpu_flag_z};
+use crate::emu_components::cpu::CpuContext;
+use crate::emu_components::cpu_util::{cpu_flag_c, cpu_flag_z};
 use crate::emu_components::emu::emu_cycles;
 use crate::emu_components::instructions::{CondType, InType};
 
-pub type IN_PROC = unsafe fn(&mut cpu_context);
+pub type IN_PROC = unsafe fn(&mut CpuContext);
 
-fn proc_none(ctx: &mut cpu_context) {
+fn proc_none(ctx: &mut CpuContext) {
     panic!("Invalid instructions");
 }
 
-fn proc_unknown(ctx: &mut cpu_context) {
+fn proc_unknown(ctx: &mut CpuContext) {
     panic!("Unimplemented proc for instruction: {:2X}", ctx.cur_opcode);
 }
 
-fn proc_nop(ctx: &mut cpu_context) {}
+fn proc_nop(ctx: &mut CpuContext) {}
 
-fn proc_ld(ctx: &mut cpu_context) {
+fn proc_ld(ctx: &mut CpuContext) {
     //Todo
 }
 
 fn cpu_set_flags(
-    ctx: &mut cpu_context,
+    ctx: &mut CpuContext,
     z: Option<bool>,
     n: Option<bool>,
     h: Option<bool>,
@@ -44,7 +44,7 @@ fn cpu_set_flags(
     }
 }
 
-fn proc_xor(ctx: &mut cpu_context) {
+fn proc_xor(ctx: &mut CpuContext) {
     ctx.regs.a ^= ctx.fetched_data as u8;
 
     cpu_set_flags(
@@ -56,7 +56,7 @@ fn proc_xor(ctx: &mut cpu_context) {
     )
 }
 
-unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
+unsafe fn check_cond(ctx: &mut CpuContext) -> bool {
     let z = cpu_flag_z();
     let c = cpu_flag_c();
 
@@ -69,11 +69,11 @@ unsafe fn check_cond(ctx: &mut cpu_context) -> bool {
     }
 }
 
-unsafe fn proc_di(ctx: &mut cpu_context) {
+unsafe fn proc_di(ctx: &mut CpuContext) {
     ctx.int_master_enabled = false;
 }
 
-unsafe fn proc_jp(ctx: &mut cpu_context) {
+unsafe fn proc_jp(ctx: &mut CpuContext) {
     if check_cond(ctx) {
         ctx.regs.pc = ctx.fetched_data;
         emu_cycles(1);
