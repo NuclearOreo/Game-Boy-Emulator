@@ -116,7 +116,8 @@ unsafe fn fetch_data() {
 }
 
 unsafe fn execute() {
-    println!("\tNot executing yet...");
+    let proc = inst_get_processor(CTX.cur_inst.i_type);
+    proc(&mut CTX);
 }
 
 pub unsafe fn cpu_step() -> bool {
@@ -162,7 +163,11 @@ unsafe fn cpu_read_reg(rt: RegType) -> u16 {
 pub type IN_PROC = unsafe fn(&mut cpu_context);
 
 fn proc_none(ctx: &mut cpu_context) {
-    panic!("Invalid instructions")
+    panic!("Invalid instructions");
+}
+
+fn proc_unknown(ctx: &mut cpu_context) {
+    panic!("Unkown instructions: {:#x}", ctx.cur_opcode);
 }
 
 fn proc_nop(ctx: &mut cpu_context) {}
@@ -197,6 +202,6 @@ pub fn inst_get_processor(i_type: InType) -> IN_PROC {
         InType::IN_NOP => proc_nop,
         InType::IN_LD => proc_ld,
         InType::IN_JP => proc_jp,
-        _ => proc_none,
+        _ => proc_unknown,
     }
 }
