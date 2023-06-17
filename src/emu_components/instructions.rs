@@ -95,6 +95,13 @@ pub enum InType {
     IN_SET,
 }
 
+impl std::fmt::Display for InType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let val = format!("{:?}", self);
+        write!(f, "{:<7}", &val[3..])
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CondType {
     CT_NONE,

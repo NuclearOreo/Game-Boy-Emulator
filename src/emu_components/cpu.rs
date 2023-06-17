@@ -82,7 +82,7 @@ unsafe fn fetch_instruction() {
 
     CTX.cur_inst = match instruction_by_opcode(CTX.cur_opcode) {
         Some(x) => x,
-        _ => panic!("Unknown instruction: {:#x}", CTX.cur_opcode),
+        _ => panic!("Unknown instruction: {:2X}", CTX.cur_opcode),
     }
 }
 
@@ -127,8 +127,15 @@ pub unsafe fn cpu_step() -> bool {
         fetch_data();
 
         println!(
-            "Executing Instruction: {:#x}   PC: {:#x}",
-            CTX.cur_opcode, pc
+            "{:2X}: {} ({:2X}, {:2X}, {:2X}) A: {:2X} B: {:2X} C: {:2X}",
+            pc,
+            CTX.cur_inst.i_type,
+            CTX.cur_opcode,
+            bus_read(pc + 1),
+            bus_read(pc + 2),
+            CTX.regs.a,
+            CTX.regs.b,
+            CTX.regs.c
         );
 
         execute();
@@ -167,7 +174,7 @@ fn proc_none(ctx: &mut cpu_context) {
 }
 
 fn proc_unknown(ctx: &mut cpu_context) {
-    panic!("Unimplemented proc for instruction: {:#x}", ctx.cur_opcode);
+    panic!("Unimplemented proc for instruction: {:2X}", ctx.cur_opcode);
 }
 
 fn proc_nop(ctx: &mut cpu_context) {}
