@@ -4,7 +4,7 @@ use crate::emu_components::cpu_util::{cpu_flag_c, cpu_flag_z};
 use crate::emu_components::emu::emu_cycles;
 use crate::emu_components::instructions::{CondType, InType};
 
-pub type IN_PROC = unsafe fn(&mut CpuContext);
+pub type InProc = unsafe fn(&mut CpuContext);
 
 fn proc_none(ctx: &mut CpuContext) {
     panic!("Invalid instructions");
@@ -80,7 +80,7 @@ unsafe fn proc_jp(ctx: &mut CpuContext) {
     }
 }
 
-pub fn inst_get_processor(i_type: InType) -> IN_PROC {
+pub fn inst_get_processor(i_type: InType) -> InProc {
     match i_type {
         InType::IN_NONE => proc_none,
         InType::IN_NOP => proc_nop,

@@ -121,7 +121,7 @@ pub struct Instruction {
     pub param: u8,
 }
 
-static mut instructions: [Instruction; 0x100] = [Instruction {
+static mut Instructions: [Instruction; 0x100] = [Instruction {
     i_type: InType::IN_NONE,
     mode: AddrMode::AM_IMP,
     reg_1: RegType::RT_NONE,
@@ -130,8 +130,8 @@ static mut instructions: [Instruction; 0x100] = [Instruction {
     param: 0,
 }; 0x100];
 
-pub unsafe fn set_instuctions() {
-    instructions[0x00] = Instruction {
+pub unsafe fn set_instructions() {
+    Instructions[0x00] = Instruction {
         i_type: InType::IN_NOP,
         mode: AddrMode::AM_IMP,
         reg_1: RegType::RT_NONE,
@@ -139,7 +139,7 @@ pub unsafe fn set_instuctions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
-    instructions[0x05] = Instruction {
+    Instructions[0x05] = Instruction {
         i_type: InType::IN_DEC,
         mode: AddrMode::AM_R,
         reg_1: RegType::RT_B,
@@ -147,7 +147,7 @@ pub unsafe fn set_instuctions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
-    instructions[0x0E] = Instruction {
+    Instructions[0x0E] = Instruction {
         i_type: InType::IN_LD,
         mode: AddrMode::AM_R_D8,
         reg_1: RegType::RT_C,
@@ -155,7 +155,7 @@ pub unsafe fn set_instuctions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
-    instructions[0xAF] = Instruction {
+    Instructions[0xAF] = Instruction {
         i_type: InType::IN_XOR,
         mode: AddrMode::AM_R,
         reg_1: RegType::RT_A,
@@ -163,7 +163,7 @@ pub unsafe fn set_instuctions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
-    instructions[0xC3] = Instruction {
+    Instructions[0xC3] = Instruction {
         i_type: InType::IN_JP,
         mode: AddrMode::AM_D16,
         reg_1: RegType::RT_NONE,
@@ -171,7 +171,7 @@ pub unsafe fn set_instuctions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
-    instructions[0xF3] = Instruction {
+    Instructions[0xF3] = Instruction {
         i_type: InType::IN_DI,
         mode: AddrMode::AM_IMP,
         reg_1: RegType::RT_NONE,
@@ -179,7 +179,7 @@ pub unsafe fn set_instuctions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
-    instructions[0x21] = Instruction {
+    Instructions[0x21] = Instruction {
         i_type: InType::IN_LD,
         mode: AddrMode::AM_IMP,
         reg_1: RegType::RT_A,
@@ -191,9 +191,9 @@ pub unsafe fn set_instuctions() {
 
 pub unsafe fn instruction_by_opcode(code: u8) -> Option<Instruction> {
     let code = code as usize;
-    if instructions[code].i_type == InType::IN_NONE {
+    if Instructions[code].i_type == InType::IN_NONE {
         return None;
     }
 
-    Some(instructions[code])
+    Some(Instructions[code])
 }

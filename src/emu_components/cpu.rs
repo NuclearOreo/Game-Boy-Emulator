@@ -1,11 +1,11 @@
 use crate::emu_components::bus::bus_read;
 use crate::emu_components::cpu_fetch::fetch_data;
 use crate::emu_components::cpu_proc::inst_get_processor;
-use crate::emu_components::instructions::{instruction_by_opcode, set_instuctions};
+use crate::emu_components::instructions::{instruction_by_opcode, set_instructions};
 use crate::emu_components::instructions::{AddrMode, CondType, InType, Instruction, RegType};
 
 #[derive(Debug)]
-pub struct cpu_registers {
+pub struct CpuRegisters {
     pub a: u8,
     pub f: u8,
     pub b: u8,
@@ -20,7 +20,7 @@ pub struct cpu_registers {
 
 #[derive(Debug)]
 pub struct CpuContext {
-    pub regs: cpu_registers,
+    pub regs: CpuRegisters,
 
     // Current fetch
     pub fetched_data: u16,
@@ -37,7 +37,7 @@ pub struct CpuContext {
 }
 
 static mut CTX: CpuContext = CpuContext {
-    regs: cpu_registers {
+    regs: CpuRegisters {
         a: 1,
         f: 0,
         b: 0,
@@ -71,7 +71,7 @@ pub unsafe fn cpu_get_context() -> &'static mut CpuContext {
 }
 
 pub unsafe fn cpu_init() {
-    set_instuctions();
+    set_instructions();
     CTX.regs.pc = 0x100;
 }
 
