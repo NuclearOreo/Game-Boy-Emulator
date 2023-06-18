@@ -33,8 +33,27 @@ pub unsafe fn cpu_read_reg(rt: RegType) -> u16 {
         RegType::RT_HL => reverse(ctx.regs.h as u16),
         RegType::RT_PC => ctx.regs.pc,
         RegType::RT_SP => ctx.regs.sp,
-        _ => 0,
+        RegType::RT_NONE => 0,
     }
 }
 
-// pub unsafe fn cpu_set_reg(rt: RegType, val: u16) {}
+pub unsafe fn cpu_set_reg(rt: RegType, val: u16) {
+    let ctx = cpu_get_context();
+    match rt {
+        RegType::RT_A => ctx.regs.a = val as u8,
+        RegType::RT_F => ctx.regs.f = val as u8,
+        RegType::RT_B => ctx.regs.b = val as u8,
+        RegType::RT_C => ctx.regs.c = val as u8,
+        RegType::RT_D => ctx.regs.d = val as u8,
+        RegType::RT_E => ctx.regs.e = val as u8,
+        RegType::RT_H => ctx.regs.h = val as u8,
+        RegType::RT_L => ctx.regs.l = val as u8,
+        RegType::RT_AF => ctx.regs.a = reverse(val) as u8,
+        RegType::RT_BC => ctx.regs.b = reverse(val) as u8,
+        RegType::RT_DE => ctx.regs.d = reverse(val) as u8,
+        RegType::RT_HL => ctx.regs.h = reverse(val) as u8,
+        RegType::RT_PC => ctx.regs.pc = val,
+        RegType::RT_SP => ctx.regs.sp = val,
+        RegType::RT_NONE => (),
+    }
+}
