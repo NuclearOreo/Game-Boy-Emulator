@@ -12,7 +12,7 @@ fn proc_none(ctx: &mut CpuContext) {
 }
 
 fn proc_unknown(ctx: &mut CpuContext) {
-    panic!("Unimplemented proc for instruction: {:2X}", ctx.cur_opcode);
+    panic!("Unimplemented proc for instruction: {:02X}", ctx.cur_opcode);
 }
 
 fn proc_nop(ctx: &mut CpuContext) {}
@@ -38,7 +38,6 @@ unsafe fn proc_ld(ctx: &mut CpuContext) {
             cpu_read_reg(ctx.cur_inst.reg_2) + (ctx.fetched_data as u8) as u16,
         )
     }
-
     cpu_set_reg(ctx.cur_inst.reg_1, ctx.fetched_data);
 }
 

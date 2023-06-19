@@ -81,7 +81,7 @@ unsafe fn fetch_instruction() {
 
     CTX.cur_inst = match instruction_by_opcode(CTX.cur_opcode) {
         Some(x) => x,
-        _ => panic!("Unknown instruction: {:2X}", CTX.cur_opcode),
+        _ => panic!("Unknown instruction: {:02X}", CTX.cur_opcode),
     }
 }
 
@@ -97,7 +97,7 @@ pub unsafe fn cpu_step() -> bool {
         fetch_data();
 
         println!(
-            "{:2X}: {} ({:2X}, {:2X}, {:2X}) A: {:2X} B: {:2X} C: {:2X}",
+            "{:02X}: {} ({:02X}, {:02X}, {:02X}) A: {:02X} BC: {:02X}{:02X} DE: {:02X}{:02X} HL: {:02X}{:02X}",
             pc,
             CTX.cur_inst.i_type,
             CTX.cur_opcode,
@@ -105,7 +105,11 @@ pub unsafe fn cpu_step() -> bool {
             bus_read(pc + 2),
             CTX.regs.a,
             CTX.regs.b,
-            CTX.regs.c
+            CTX.regs.c,
+            CTX.regs.d,
+            CTX.regs.e,
+            CTX.regs.h,
+            CTX.regs.l,
         );
 
         execute();
