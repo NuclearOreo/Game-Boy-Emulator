@@ -15,19 +15,71 @@ use super::cart::{cart_read, cart_write};
 
 pub unsafe fn bus_read(address: u16) -> u8 {
     if address < 0x8000 {
+        //ROM Data
         return cart_read(address);
+    } else if address < 0xA000 {
+        //Char/Map Data
+        //TODO
+        panic!("UNSUPPORTED  write read ({:X})", address);
+    } else if address < 0xC000 {
+        //Cartridge RAM
+        return cart_read(address);
+    } else if address < 0xE000 {
+        //WRAM (Working RAM)
+        return wram_read(address);
+    } else if address < 0xFE00 {
+        //reserved echo ram...
+        return 0;
+    } else if address < 0xFEA0 {
+        //OAM
+        //TODO
+        panic!("UNSUPPORTED  write read ({:X})", address);
+    } else if address < 0xFF00 {
+        //reserved unusable...
+        return 0;
+    } else if address < 0xFF80 {
+        //IO Registers...
+        //TODO
+        panic!("UNSUPPORTED  write read ({:X})", address);
+    } else if address < 0xFFFF {
+        //CPU ENABLE REGISTER...
+        //TODO
+        return cpu_get_ie_register();
     }
-    println!("UNSUPPORTED Bus read ({:X})", address);
-    0
+
+    //NO_IMPL
+    return hram_read(address);
 }
 
 pub fn bus_write(address: u16, value: u8) {
     if address < 0x8000 {
+        //ROM Data
         cart_write(address, value);
-        return;
+    } else if address < 0xA000 {
+        //Char/Map Data
+        //TODO
+        panic!("UNSUPPORTED  write read ({:X})", address);
+    } else if address < 0xC000 {
+        //WRAM
+        wram_write(address, value);
+    } else if address < 0xFE00 {
+        //reserved echo ram
+    } else if address < 0xFEA0 {
+        //OAM
+        //TODO
+        panic!("UNSUPPORTED  write read ({:X})", address);
+    } else if address < 0xFF00 {
+        //unusable reserved
+    } else if address < 0xFF80 {
+        //IO Registers...
+        //TODO
+        panic!("UNSUPPORTED  write read ({:X})", address);
+    } else if address < 0xFFFF {
+        //CPU SET ENABLE REGISTER
+        cpu_set_ie_register(value);
+    } else {
+        hram_write(address, value);
     }
-
-    println!("UNSUPPORTED  write read ({:X})", address);
 }
 
 pub unsafe fn bus_read16(address: u16) -> u16 {
