@@ -218,7 +218,7 @@ pub unsafe fn set_instructions() {
         param: 0,
     };
 
-    // 0x01
+    // 0x1X
     INSTRUCTIONS[0x11] = Instruction {
         i_type: InType::IN_LD,
         mode: AddrMode::AM_R_D16,
@@ -268,7 +268,7 @@ pub unsafe fn set_instructions() {
         param: 0,
     };
 
-    //0x2
+    //0x2X
     INSTRUCTIONS[0x21] = Instruction {
         i_type: InType::IN_LD,
         mode: AddrMode::AM_R_D16,
@@ -318,7 +318,7 @@ pub unsafe fn set_instructions() {
         param: 0,
     };
 
-    //0x3
+    //0x3X
     INSTRUCTIONS[0x31] = Instruction {
         i_type: InType::IN_LD,
         mode: AddrMode::AM_R_D16,
