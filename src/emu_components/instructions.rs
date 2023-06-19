@@ -219,6 +219,54 @@ pub unsafe fn set_instructions() {
     };
 
     // 0x01
+    INSTRUCTIONS[0x11] = Instruction {
+        i_type: InType::IN_LD,
+        mode: AddrMode::AM_R_D16,
+        reg_1: RegType::RT_DE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    INSTRUCTIONS[0x12] = Instruction {
+        i_type: InType::IN_LD,
+        mode: AddrMode::AM_MR_R,
+        reg_1: RegType::RT_DE,
+        reg_2: RegType::RT_A,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    INSTRUCTIONS[0x15] = Instruction {
+        i_type: InType::IN_DEC,
+        mode: AddrMode::AM_R,
+        reg_1: RegType::RT_D,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    INSTRUCTIONS[0x16] = Instruction {
+        i_type: InType::IN_LD,
+        mode: AddrMode::AM_R_D8,
+        reg_1: RegType::RT_D,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    INSTRUCTIONS[0x1A] = Instruction {
+        i_type: InType::IN_LD,
+        mode: AddrMode::AM_R_MR,
+        reg_1: RegType::RT_A,
+        reg_2: RegType::RT_DE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    INSTRUCTIONS[0x1E] = Instruction {
+        i_type: InType::IN_LD,
+        mode: AddrMode::AM_R_D8,
+        reg_1: RegType::RT_E,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
 
     INSTRUCTIONS[0xAF] = Instruction {
         i_type: InType::IN_XOR,
