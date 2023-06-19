@@ -26,5 +26,16 @@ pub fn bus_write(address: u16, value: u8) {
         return;
     }
 
-    panic!("Bus Read not implemented");
+    panic!("Bus write not implemented");
+}
+
+pub unsafe fn bus_read16(address: u16) -> u16 {
+    let lo = bus_read(address) as u16;
+    let hi = bus_read(address + 1) as u16;
+    lo | (hi << 8)
+}
+
+pub unsafe fn bus_write16(address: u16, value: u16) {
+    bus_write(address + 1, (value >> 8) as u8);
+    bus_write(address, value as u8);
 }

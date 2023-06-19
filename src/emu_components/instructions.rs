@@ -44,6 +44,20 @@ pub enum RegType {
     RT_PC,
 }
 
+impl RegType {
+    pub fn is_16bit(self) -> bool {
+        match self {
+            RegType::RT_AF
+            | RegType::RT_BC
+            | RegType::RT_DE
+            | RegType::RT_HL
+            | RegType::RT_SP
+            | RegType::RT_PC => true,
+            _ => false,
+        }
+    }
+}
+
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InType {

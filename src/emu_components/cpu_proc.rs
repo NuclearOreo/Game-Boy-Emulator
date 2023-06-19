@@ -1,8 +1,9 @@
-use crate::emu_components::common::bit_set;
-use crate::emu_components::cpu::CpuContext;
-use crate::emu_components::cpu_util::{cpu_flag_c, cpu_flag_z};
-use crate::emu_components::emu::emu_cycles;
-use crate::emu_components::instructions::{CondType, InType};
+use super::bus::{bus_write, bus_write16};
+use super::common::bit_set;
+use super::cpu::CpuContext;
+use super::cpu_util::{cpu_flag_c, cpu_flag_z, cpu_read_reg, cpu_set_reg};
+use super::emu::emu_cycles;
+use super::instructions::{AddrMode, CondType, InType};
 
 pub type InProc = unsafe fn(&mut CpuContext);
 
@@ -16,8 +17,29 @@ fn proc_unknown(ctx: &mut CpuContext) {
 
 fn proc_nop(ctx: &mut CpuContext) {}
 
-fn proc_ld(ctx: &mut CpuContext) {
-    //Todo
+unsafe fn proc_ld(ctx: &mut CpuContext) {
+    if ctx.dest_is_mem {
+        if ctx.cur_inst.reg_2.is_16bit() {
+            emu_cycles(1);
+            bus_write16(ctx.mem_dest, ctx.fetched_data);
+        } else {
+            bus_write(ctx.mem_dest, ctx.fetched_data as u8);
+        }
+    }
+
+    if ctx.cur_inst.mode == AddrMode::AM_HL_SPR {
+        let hflag = (cpu_read_reg(ctx.cur_inst.reg_2) & 0xF) + (ctx.fetched_data & 0xF) >= 0x10;
+        let cflag = (cpu_read_reg(ctx.cur_inst.reg_2) & 0xFF) + (ctx.fetched_data & 0xFF) >= 0x100;
+
+        cpu_set_flags(ctx, Some(false), Some(false), Some(hflag), Some(cflag));
+
+        cpu_set_reg(
+            ctx.cur_inst.reg_1,
+            cpu_read_reg(ctx.cur_inst.reg_2) + (ctx.fetched_data as u8) as u16,
+        )
+    }
+
+    cpu_set_reg(ctx.cur_inst.reg_1, ctx.fetched_data);
 }
 
 fn cpu_set_flags(
