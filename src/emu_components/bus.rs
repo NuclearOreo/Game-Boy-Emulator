@@ -1,4 +1,4 @@
-use crate::emu_components::cart::{cart_read, cart_write};
+use super::cart::{cart_read, cart_write};
 // 0x0000 - 0x3FFF : ROM Bank 0
 // 0x4000 - 0x7FFF : ROM Bank 1 - Switchable
 // 0x8000 - 0x97FF : CHR RAM
@@ -17,7 +17,8 @@ pub unsafe fn bus_read(address: u16) -> u8 {
     if address < 0x8000 {
         return cart_read(address);
     }
-    panic!("Bus Read not implemented");
+    println!("UNSUPPORTED Bus read ({:X})", address);
+    0
 }
 
 pub fn bus_write(address: u16, value: u8) {
@@ -26,5 +27,16 @@ pub fn bus_write(address: u16, value: u8) {
         return;
     }
 
-    panic!("Bus Read not implemented");
+    println!("UNSUPPORTED  write read ({:X})", address);
+}
+
+pub unsafe fn bus_read16(address: u16) -> u16 {
+    let lo = bus_read(address) as u16;
+    let hi = bus_read(address + 1) as u16;
+    lo | (hi << 8)
+}
+
+pub unsafe fn bus_write16(address: u16, value: u16) {
+    bus_write(address + 1, (value >> 8) as u8);
+    bus_write(address, value as u8);
 }
