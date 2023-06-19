@@ -242,5 +242,5 @@ pub unsafe fn cart_read(address: u16) -> u8 {
 }
 
 pub fn cart_write(address: u16, value: u8) {
-    panic!("Cart Write not implemented")
+    panic!("Cart Write ({:X})", address);
 }

@@ -17,7 +17,8 @@ pub unsafe fn bus_read(address: u16) -> u8 {
     if address < 0x8000 {
         return cart_read(address);
     }
-    panic!("Bus Read not implemented");
+    println!("UNSUPPORTED Bus read ({:X})", address);
+    0
 }
 
 pub fn bus_write(address: u16, value: u8) {
@@ -26,7 +27,7 @@ pub fn bus_write(address: u16, value: u8) {
         return;
     }
 
-    panic!("Bus write not implemented");
+    println!("UNSUPPORTED  write read ({:X})", address);
 }
 
 pub unsafe fn bus_read16(address: u16) -> u16 {
