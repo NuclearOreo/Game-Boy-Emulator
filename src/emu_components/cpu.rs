@@ -1,8 +1,8 @@
-use crate::emu_components::bus::bus_read;
-use crate::emu_components::cpu_fetch::fetch_data;
-use crate::emu_components::cpu_proc::inst_get_processor;
-use crate::emu_components::instructions::{instruction_by_opcode, set_instructions};
-use crate::emu_components::instructions::{AddrMode, CondType, InType, Instruction, RegType};
+use super::bus::bus_read;
+use super::cpu_fetch::fetch_data;
+use super::cpu_proc::inst_get_processor;
+use super::instructions::{instruction_by_opcode, set_instructions};
+use super::instructions::{AddrMode, CondType, InType, Instruction, RegType};
 
 #[derive(Debug)]
 pub struct CpuRegisters {

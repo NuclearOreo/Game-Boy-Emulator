@@ -1,6 +1,6 @@
-use crate::emu_components::common::bit;
-use crate::emu_components::cpu::cpu_get_context;
-use crate::emu_components::instructions::RegType;
+use super::common::bit;
+use super::cpu::cpu_get_context;
+use super::instructions::RegType;
 
 pub unsafe fn cpu_flag_z() -> bool {
     let ctx = cpu_get_context();

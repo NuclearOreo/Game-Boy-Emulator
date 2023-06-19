@@ -1,4 +1,4 @@
-use crate::emu_components::cart::{cart_read, cart_write};
+use super::cart::{cart_read, cart_write};
 // 0x0000 - 0x3FFF : ROM Bank 0
 // 0x4000 - 0x7FFF : ROM Bank 1 - Switchable
 // 0x8000 - 0x97FF : CHR RAM

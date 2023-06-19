@@ -1,8 +1,8 @@
-use crate::emu_components::bus::bus_read;
-use crate::emu_components::cpu::cpu_get_context;
-use crate::emu_components::cpu_util::{cpu_read_reg, cpu_set_reg};
-use crate::emu_components::emu::emu_cycles;
-use crate::emu_components::instructions::{AddrMode, RegType};
+use super::bus::bus_read;
+use super::cpu::cpu_get_context;
+use super::cpu_util::{cpu_read_reg, cpu_set_reg};
+use super::emu::emu_cycles;
+use super::instructions::{AddrMode, RegType};
 
 pub unsafe fn fetch_data() {
     let ctx = cpu_get_context();

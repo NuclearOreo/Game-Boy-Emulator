@@ -1,5 +1,5 @@
-use crate::emu_components::cart::cart_load;
-use crate::emu_components::cpu::{cpu_init, cpu_step};
+use super::cart::cart_load;
+use super::cpu::{cpu_init, cpu_step};
 use sdl2;
 use sdl2_sys::SDL_Delay;
 
