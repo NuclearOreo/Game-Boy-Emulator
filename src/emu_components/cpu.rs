@@ -97,7 +97,7 @@ pub unsafe fn cpu_step() -> bool {
         fetch_data();
 
         println!(
-            "{:02X}: {} ({:02X}, {:02X}, {:02X}) A: {:02X} BC: {:02X}{:02X} DE: {:02X}{:02X} HL: {:02X}{:02X}",
+            "{:02X}: {} ({:02X} {:02X} {:02X}) A: {:02X} BC: {:02X}{:02X} DE: {:02X}{:02X} HL: {:02X}{:02X}",
             pc,
             CTX.cur_inst.i_type,
             CTX.cur_opcode,
