@@ -1,4 +1,6 @@
 use super::cart::{cart_read, cart_write};
+use super::cpu::{cpu_get_ie_register, cpu_set_ie_register};
+use super::ram::{hram_read, hram_write, wram_read, wram_write};
 // 0x0000 - 0x3FFF : ROM Bank 0
 // 0x4000 - 0x7FFF : ROM Bank 1 - Switchable
 // 0x8000 - 0x97FF : CHR RAM
@@ -15,19 +17,75 @@ use super::cart::{cart_read, cart_write};
 
 pub unsafe fn bus_read(address: u16) -> u8 {
     if address < 0x8000 {
+        //ROM Data
         return cart_read(address);
+    } else if address < 0xA000 {
+        //Char/Map Data
+        //TODO
+        panic!("UNSUPPORTED  write read ({:04X})", address);
+    } else if address < 0xC000 {
+        //Cartridge RAM
+        return cart_read(address);
+    } else if address < 0xE000 {
+        //WRAM (Working RAM)
+        return wram_read(address);
+    } else if address < 0xFE00 {
+        //reserved echo ram...
+        return 0;
+    } else if address < 0xFEA0 {
+        //OAM
+        //TODO
+        panic!("UNSUPPORTED  write read ({:04X})", address);
+    } else if address < 0xFF00 {
+        //reserved unusable...
+        return 0;
+    } else if address < 0xFF80 {
+        //IO Registers...
+        //TODO
+        panic!("UNSUPPORTED  write read ({:04X})", address);
+    } else if address < 0xFFFF {
+        //CPU ENABLE REGISTER...
+        return cpu_get_ie_register();
     }
-    println!("UNSUPPORTED Bus read ({:X})", address);
-    0
+
+    //NO_IMPL
+    return hram_read(address);
 }
 
-pub fn bus_write(address: u16, value: u8) {
+pub unsafe fn bus_write(address: u16, value: u8) {
     if address < 0x8000 {
+        //ROM Data
         cart_write(address, value);
+    } else if address < 0xA000 {
+        //Char/Map Data
+        //TODO
+        println!("UNSUPPORTED  write read ({:04X})", address);
+        // panic!("UNSUPPORTED  write read ({:04X})", address);
+    } else if address < 0xC000 {
+        //WRAM
+        wram_write(address, value);
+    } else if address < 0xFE00 {
+        //reserved echo ram
         return;
+    } else if address < 0xFEA0 {
+        //OAM
+        //TODO
+        println!("UNSUPPORTED  write read ({:04X})", address);
+        // panic!("UNSUPPORTED  write read ({:04X})", address);
+    } else if address < 0xFF00 {
+        //unusable reserved
+        return;
+    } else if address < 0xFF80 {
+        //IO Registers...
+        //TODO
+        println!("UNSUPPORTED  write read ({:04X})", address);
+        // panic!("UNSUPPORTED  write read ({:04X})", address);
+    } else if address == 0xFFFF {
+        //CPU SET ENABLE REGISTER
+        cpu_set_ie_register(value);
+    } else {
+        hram_write(address, value);
     }
-
-    println!("UNSUPPORTED  write read ({:X})", address);
 }
 
 pub unsafe fn bus_read16(address: u16) -> u16 {

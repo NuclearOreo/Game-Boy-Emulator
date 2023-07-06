@@ -1,9 +1,9 @@
-use super::bus::{bus_write, bus_write16};
+use super::bus::{bus_read, bus_write, bus_write16};
 use super::common::bit_set;
 use super::cpu::CpuContext;
 use super::cpu_util::{cpu_flag_c, cpu_flag_z, cpu_read_reg, cpu_set_reg};
 use super::emu::emu_cycles;
-use super::instructions::{AddrMode, CondType, InType};
+use super::instructions::{AddrMode, CondType, InType, RegType};
 
 pub type InProc = unsafe fn(&mut CpuContext);
 
@@ -12,7 +12,7 @@ fn proc_none(ctx: &mut CpuContext) {
 }
 
 fn proc_unknown(ctx: &mut CpuContext) {
-    panic!("Unimplemented proc for instruction: {:2X}", ctx.cur_opcode);
+    panic!("Unimplemented proc for instruction: {:02X}", ctx.cur_opcode);
 }
 
 fn proc_nop(ctx: &mut CpuContext) {}
@@ -38,7 +38,6 @@ unsafe fn proc_ld(ctx: &mut CpuContext) {
             cpu_read_reg(ctx.cur_inst.reg_2) + (ctx.fetched_data as u8) as u16,
         )
     }
-
     cpu_set_reg(ctx.cur_inst.reg_1, ctx.fetched_data);
 }
 
@@ -64,6 +63,19 @@ fn cpu_set_flags(
     if let Some(c) = c {
         bit_set(&mut ctx.regs.f, 4, c);
     }
+}
+
+unsafe fn proc_ldh(ctx: &mut CpuContext) {
+    if ctx.cur_inst.reg_1 == RegType::RT_A {
+        cpu_set_reg(
+            ctx.cur_inst.reg_1,
+            bus_read(0xFF00 | ctx.fetched_data) as u16,
+        );
+    } else {
+        bus_write(0xFF00 | ctx.fetched_data, ctx.regs.a);
+    }
+
+    emu_cycles(1);
 }
 
 fn proc_xor(ctx: &mut CpuContext) {
@@ -106,6 +118,7 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
     match i_type {
         InType::IN_NONE => proc_none,
         InType::IN_NOP => proc_nop,
+        InType::IN_LDH => proc_ldh,
         InType::IN_LD => proc_ld,
         InType::IN_JP => proc_jp,
         InType::IN_DI => proc_di,

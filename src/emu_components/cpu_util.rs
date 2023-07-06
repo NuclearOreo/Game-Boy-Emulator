@@ -27,10 +27,10 @@ pub unsafe fn cpu_read_reg(rt: RegType) -> u16 {
         RegType::RT_E => ctx.regs.e as u16,
         RegType::RT_H => ctx.regs.h as u16,
         RegType::RT_L => ctx.regs.l as u16,
-        RegType::RT_AF => reverse(ctx.regs.a as u16),
-        RegType::RT_BC => reverse(ctx.regs.b as u16),
-        RegType::RT_DE => reverse(ctx.regs.d as u16),
-        RegType::RT_HL => reverse(ctx.regs.h as u16),
+        RegType::RT_AF => ((ctx.regs.a as u16) << 8) | (ctx.regs.f as u16),
+        RegType::RT_BC => ((ctx.regs.b as u16) << 8) | (ctx.regs.c as u16),
+        RegType::RT_DE => ((ctx.regs.d as u16) << 8) | (ctx.regs.e as u16),
+        RegType::RT_HL => ((ctx.regs.h as u16) << 8) | (ctx.regs.l as u16),
         RegType::RT_PC => ctx.regs.pc,
         RegType::RT_SP => ctx.regs.sp,
         RegType::RT_NONE => 0,
@@ -48,10 +48,26 @@ pub unsafe fn cpu_set_reg(rt: RegType, val: u16) {
         RegType::RT_E => ctx.regs.e = val as u8,
         RegType::RT_H => ctx.regs.h = val as u8,
         RegType::RT_L => ctx.regs.l = val as u8,
-        RegType::RT_AF => ctx.regs.a = reverse(val) as u8,
-        RegType::RT_BC => ctx.regs.b = reverse(val) as u8,
-        RegType::RT_DE => ctx.regs.d = reverse(val) as u8,
-        RegType::RT_HL => ctx.regs.h = reverse(val) as u8,
+        RegType::RT_AF => {
+            let reversed = reverse(val);
+            ctx.regs.a = reversed as u8;
+            ctx.regs.f = (reversed >> 8) as u8;
+        }
+        RegType::RT_BC => {
+            let reversed = reverse(val);
+            ctx.regs.b = reversed as u8;
+            ctx.regs.c = (reversed >> 8) as u8;
+        }
+        RegType::RT_DE => {
+            let reversed = reverse(val);
+            ctx.regs.d = reversed as u8;
+            ctx.regs.e = (reversed >> 8) as u8;
+        }
+        RegType::RT_HL => {
+            let reversed = reverse(val);
+            ctx.regs.h = reversed as u8;
+            ctx.regs.l = (reversed >> 8) as u8;
+        }
         RegType::RT_PC => ctx.regs.pc = val,
         RegType::RT_SP => ctx.regs.sp = val,
         RegType::RT_NONE => (),

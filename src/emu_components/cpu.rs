@@ -27,13 +27,14 @@ pub struct CpuContext {
     pub mem_dest: u16,
     pub dest_is_mem: bool,
     pub cur_opcode: u8,
+    pub cur_inst: Instruction,
 
     pub halted: bool,
     pub stepping: bool,
 
     pub int_master_enabled: bool,
 
-    pub cur_inst: Instruction,
+    pub ie_register: u8,
 }
 
 static mut CTX: CpuContext = CpuContext {
@@ -56,6 +57,7 @@ static mut CTX: CpuContext = CpuContext {
     halted: false,
     stepping: false,
     int_master_enabled: true,
+    ie_register: 0,
     cur_inst: Instruction {
         i_type: InType::IN_NONE,
         mode: AddrMode::AM_IMP,
@@ -81,7 +83,7 @@ unsafe fn fetch_instruction() {
 
     CTX.cur_inst = match instruction_by_opcode(CTX.cur_opcode) {
         Some(x) => x,
-        _ => panic!("Unknown instruction: {:2X}", CTX.cur_opcode),
+        _ => panic!("Unknown instruction: {:02X}", CTX.cur_opcode),
     }
 }
 
@@ -97,7 +99,7 @@ pub unsafe fn cpu_step() -> bool {
         fetch_data();
 
         println!(
-            "{:2X}: {} ({:2X}, {:2X}, {:2X}) A: {:2X} B: {:2X} C: {:2X}",
+            "{:02X}: {} ({:02X} {:02X} {:02X}) A: {:02X} BC: {:02X}{:02X} DE: {:02X}{:02X} HL: {:02X}{:02X}",
             pc,
             CTX.cur_inst.i_type,
             CTX.cur_opcode,
@@ -105,10 +107,22 @@ pub unsafe fn cpu_step() -> bool {
             bus_read(pc + 2),
             CTX.regs.a,
             CTX.regs.b,
-            CTX.regs.c
+            CTX.regs.c,
+            CTX.regs.d,
+            CTX.regs.e,
+            CTX.regs.h,
+            CTX.regs.l,
         );
 
         execute();
     }
     true
+}
+
+pub unsafe fn cpu_get_ie_register() -> u8 {
+    CTX.ie_register
+}
+
+pub unsafe fn cpu_set_ie_register(n: u8) {
+    CTX.ie_register = n;
 }

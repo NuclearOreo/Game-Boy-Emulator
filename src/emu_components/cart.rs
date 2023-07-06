@@ -228,7 +228,7 @@ pub unsafe fn cart_load(cart: String) -> Result<(), Box<dyn Error>> {
     }
 
     println!(
-        "\t Checksum : {:2X} ({})",
+        "\t Checksum : {:02X} ({})",
         CTX.header.checksum,
         if (x & 0xFF) > 0 { "PASSED" } else { "FAILED" }
     );
@@ -242,5 +242,5 @@ pub unsafe fn cart_read(address: u16) -> u8 {
 }
 
 pub fn cart_write(address: u16, value: u8) {
-    panic!("Cart Write ({:X})", address);
+    panic!("Cart Write ({:04X})", address);
 }
