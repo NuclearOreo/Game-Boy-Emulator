@@ -27,13 +27,14 @@ pub struct CpuContext {
     pub mem_dest: u16,
     pub dest_is_mem: bool,
     pub cur_opcode: u8,
+    pub cur_inst: Instruction,
 
     pub halted: bool,
     pub stepping: bool,
 
     pub int_master_enabled: bool,
 
-    pub cur_inst: Instruction,
+    pub ie_register: u8,
 }
 
 static mut CTX: CpuContext = CpuContext {
@@ -56,6 +57,7 @@ static mut CTX: CpuContext = CpuContext {
     halted: false,
     stepping: false,
     int_master_enabled: true,
+    ie_register: 0,
     cur_inst: Instruction {
         i_type: InType::IN_NONE,
         mode: AddrMode::AM_IMP,
@@ -115,4 +117,12 @@ pub unsafe fn cpu_step() -> bool {
         execute();
     }
     true
+}
+
+pub unsafe fn cpu_get_ie_register() -> u8 {
+    CTX.ie_register
+}
+
+pub unsafe fn cpu_set_ie_register(n: u8) {
+    CTX.ie_register = n;
 }

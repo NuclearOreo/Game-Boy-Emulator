@@ -1,4 +1,5 @@
 use super::cart::{cart_read, cart_write};
+use super::cpu::{cpu_get_ie_register, cpu_set_ie_register};
 use super::ram::{hram_read, hram_write, wram_read, wram_write};
 // 0x0000 - 0x3FFF : ROM Bank 0
 // 0x4000 - 0x7FFF : ROM Bank 1 - Switchable
@@ -44,8 +45,7 @@ pub unsafe fn bus_read(address: u16) -> u8 {
         panic!("UNSUPPORTED  write read ({:04X})", address);
     } else if address < 0xFFFF {
         //CPU ENABLE REGISTER...
-        //TODO
-        // return cpu_get_ie_register();
+        return cpu_get_ie_register();
     }
 
     //NO_IMPL
@@ -59,25 +59,30 @@ pub unsafe fn bus_write(address: u16, value: u8) {
     } else if address < 0xA000 {
         //Char/Map Data
         //TODO
-        panic!("UNSUPPORTED  write read ({:04X})", address);
+        println!("UNSUPPORTED  write read ({:04X})", address);
+        // panic!("UNSUPPORTED  write read ({:04X})", address);
     } else if address < 0xC000 {
         //WRAM
         wram_write(address, value);
     } else if address < 0xFE00 {
         //reserved echo ram
+        return;
     } else if address < 0xFEA0 {
         //OAM
         //TODO
-        panic!("UNSUPPORTED  write read ({:04X})", address);
+        println!("UNSUPPORTED  write read ({:04X})", address);
+        // panic!("UNSUPPORTED  write read ({:04X})", address);
     } else if address < 0xFF00 {
         //unusable reserved
+        return;
     } else if address < 0xFF80 {
         //IO Registers...
         //TODO
-        panic!("UNSUPPORTED  write read ({:04X})", address);
-    } else if address < 0xFFFF {
+        println!("UNSUPPORTED  write read ({:04X})", address);
+        // panic!("UNSUPPORTED  write read ({:04X})", address);
+    } else if address == 0xFFFF {
         //CPU SET ENABLE REGISTER
-        // cpu_set_ie_register(value);
+        cpu_set_ie_register(value);
     } else {
         hram_write(address, value);
     }

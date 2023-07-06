@@ -933,6 +933,14 @@ pub unsafe fn set_instructions() {
     };
 
     //0xFX
+    INSTRUCTIONS[0xF0] = Instruction {
+        i_type: InType::IN_LDH,
+        mode: AddrMode::AM_R_A8,
+        reg_1: RegType::RT_A,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
     INSTRUCTIONS[0xF2] = Instruction {
         i_type: InType::IN_LD,
         mode: AddrMode::AM_R_MR,
