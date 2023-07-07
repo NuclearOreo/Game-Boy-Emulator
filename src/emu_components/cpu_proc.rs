@@ -4,6 +4,7 @@ use super::cpu::CpuContext;
 use super::cpu_util::{cpu_flag_c, cpu_flag_z, cpu_read_reg, cpu_set_reg};
 use super::emu::emu_cycles;
 use super::instructions::{AddrMode, CondType, InType, RegType};
+use super::stack::{stack_pop, stack_push};
 
 pub type InProc = unsafe fn(&mut CpuContext);
 
@@ -114,6 +115,34 @@ unsafe fn proc_jp(ctx: &mut CpuContext) {
     }
 }
 
+unsafe fn proc_pop(ctx: &mut CpuContext) {
+    let lo = stack_pop() as u16;
+    emu_cycles(1);
+
+    let hi = stack_pop() as u16;
+    emu_cycles(1);
+
+    let n = (hi << 8) | lo;
+
+    cpu_set_reg(ctx.cur_inst.reg_1, n);
+
+    if ctx.cur_inst.reg_1 == RegType::RT_AF {
+        cpu_set_reg(ctx.cur_inst.reg_1, n & 0xFFF0);
+    }
+}
+
+unsafe fn proc_push(ctx: &mut CpuContext) {
+    let hi = (cpu_read_reg(ctx.cur_inst.reg_1) >> 8) as u8;
+    emu_cycles(1);
+    stack_push(hi);
+
+    let lo = cpu_read_reg(ctx.cur_inst.reg_1) as u8;
+    emu_cycles(1);
+    stack_push(lo);
+
+    emu_cycles(1)
+}
+
 pub fn inst_get_processor(i_type: InType) -> InProc {
     match i_type {
         InType::IN_NONE => proc_none,
@@ -121,6 +150,8 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_LDH => proc_ldh,
         InType::IN_LD => proc_ld,
         InType::IN_JP => proc_jp,
+        InType::IN_POP => proc_pop,
+        InType::IN_PUSH => proc_push,
         InType::IN_DI => proc_di,
         InType::IN_XOR => proc_xor,
         _ => proc_unknown,
