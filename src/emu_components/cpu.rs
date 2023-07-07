@@ -123,6 +123,10 @@ pub unsafe fn cpu_get_ie_register() -> u8 {
     CTX.ie_register
 }
 
+pub unsafe fn cpu_get_regs() -> &'static mut CpuRegisters {
+    &mut CTX.regs
+}
+
 pub unsafe fn cpu_set_ie_register(n: u8) {
     CTX.ie_register = n;
 }
