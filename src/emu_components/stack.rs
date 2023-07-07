@@ -81,7 +81,7 @@
 */
 
 use super::bus::{bus_read, bus_write};
-use super::cpu::cpu_get_regs;
+use super::cpu_util::cpu_get_regs;
 
 pub unsafe fn stack_push(data: u8) {
     let mut regs = cpu_get_regs();

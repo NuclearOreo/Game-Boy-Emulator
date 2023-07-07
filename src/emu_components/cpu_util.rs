@@ -1,5 +1,5 @@
 use super::common::bit;
-use super::cpu::cpu_get_context;
+use super::cpu::{cpu_get_context, CpuRegisters};
 use super::instructions::RegType;
 
 pub unsafe fn cpu_flag_z() -> bool {
@@ -72,4 +72,9 @@ pub unsafe fn cpu_set_reg(rt: RegType, val: u16) {
         RegType::RT_SP => ctx.regs.sp = val,
         RegType::RT_NONE => (),
     }
+}
+
+pub unsafe fn cpu_get_regs() -> &'static mut CpuRegisters {
+    let ctx = cpu_get_context();
+    &mut ctx.regs
 }
