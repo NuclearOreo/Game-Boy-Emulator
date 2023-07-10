@@ -1,3 +1,5 @@
+use std::num::IntErrorKind;
+
 use super::bus::{bus_read, bus_write, bus_write16};
 use super::common::bit_set;
 use super::cpu::CpuContext;
@@ -134,6 +136,29 @@ unsafe fn proc_call(ctx: &mut CpuContext) {
     goto_addr(ctx, ctx.fetched_data, true);
 }
 
+unsafe fn proc_ret(ctx: &mut CpuContext) {
+    if ctx.cur_inst.cond != CondType::CT_NONE {
+        emu_cycles(1);
+    }
+
+    if check_cond(ctx) {
+        let lo = stack_pop();
+        emu_cycles(1);
+        let hi = stack_pop();
+        emu_cycles(1);
+
+        let n = ((hi as u16) << 8) | (lo as u16);
+        ctx.regs.pc = n;
+
+        emu_cycles(1);
+    }
+}
+
+unsafe fn proc_reti(ctx: &mut CpuContext) {
+    ctx.int_master_enabled = true;
+    proc_ret(ctx);
+}
+
 unsafe fn proc_pop(ctx: &mut CpuContext) {
     let lo = stack_pop() as u16;
     emu_cycles(1);
@@ -174,6 +199,8 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_CALL => proc_call,
         InType::IN_JR => proc_jr,
         InType::IN_DI => proc_di,
+        InType::IN_RET => proc_ret,
+        InType::IN_RETI => proc_reti,
         InType::IN_XOR => proc_xor,
         _ => proc_unknown,
     }
