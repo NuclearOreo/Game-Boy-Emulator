@@ -938,6 +938,14 @@ pub unsafe fn set_instructions() {
     };
 
     // 0xCX
+    INSTRUCTIONS[0xC0] = Instruction {
+        i_type: InType::IN_RET,
+        mode: AddrMode::AM_IMP,
+        reg_1: RegType::RT_NONE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NZ,
+        param: 0,
+    };
     INSTRUCTIONS[0xC1] = Instruction {
         i_type: InType::IN_POP,
         mode: AddrMode::AM_R,
@@ -978,6 +986,22 @@ pub unsafe fn set_instructions() {
         cond: CondType::CT_NONE,
         param: 0,
     };
+    INSTRUCTIONS[0xC8] = Instruction {
+        i_type: InType::IN_RET,
+        mode: AddrMode::AM_IMP,
+        reg_1: RegType::RT_NONE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_Z,
+        param: 0,
+    };
+    INSTRUCTIONS[0xC9] = Instruction {
+        i_type: InType::IN_RET,
+        mode: AddrMode::AM_IMP,
+        reg_1: RegType::RT_NONE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
     INSTRUCTIONS[0xCA] = Instruction {
         i_type: InType::IN_JP,
         mode: AddrMode::AM_D16,
@@ -1004,6 +1028,14 @@ pub unsafe fn set_instructions() {
     };
 
     // 0xDX
+    INSTRUCTIONS[0xD0] = Instruction {
+        i_type: InType::IN_RET,
+        mode: AddrMode::AM_IMP,
+        reg_1: RegType::RT_NONE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NC,
+        param: 0,
+    };
     INSTRUCTIONS[0xD1] = Instruction {
         i_type: InType::IN_POP,
         mode: AddrMode::AM_R,
@@ -1032,6 +1064,22 @@ pub unsafe fn set_instructions() {
         i_type: InType::IN_PUSH,
         mode: AddrMode::AM_R,
         reg_1: RegType::RT_DE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_NONE,
+        param: 0,
+    };
+    INSTRUCTIONS[0xD8] = Instruction {
+        i_type: InType::IN_RET,
+        mode: AddrMode::AM_IMP,
+        reg_1: RegType::RT_NONE,
+        reg_2: RegType::RT_NONE,
+        cond: CondType::CT_C,
+        param: 0,
+    };
+    INSTRUCTIONS[0xD9] = Instruction {
+        i_type: InType::IN_RETI,
+        mode: AddrMode::AM_IMP,
+        reg_1: RegType::RT_NONE,
         reg_2: RegType::RT_NONE,
         cond: CondType::CT_NONE,
         param: 0,
