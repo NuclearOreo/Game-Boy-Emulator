@@ -4,7 +4,7 @@ use super::cpu::CpuContext;
 use super::cpu_util::{cpu_flag_c, cpu_flag_z, cpu_read_reg, cpu_set_reg};
 use super::emu::emu_cycles;
 use super::instructions::{AddrMode, CondType, InType, RegType};
-use super::stack::{stack_pop, stack_push};
+use super::stack::{stack_pop, stack_push, stack_push16};
 
 pub type InProc = unsafe fn(&mut CpuContext);
 
@@ -17,6 +17,10 @@ fn proc_unknown(ctx: &mut CpuContext) {
 }
 
 fn proc_nop(ctx: &mut CpuContext) {}
+
+unsafe fn proc_di(ctx: &mut CpuContext) {
+    ctx.int_master_enabled = false;
+}
 
 unsafe fn proc_ld(ctx: &mut CpuContext) {
     if ctx.dest_is_mem {
@@ -104,15 +108,30 @@ unsafe fn check_cond(ctx: &mut CpuContext) -> bool {
     }
 }
 
-unsafe fn proc_di(ctx: &mut CpuContext) {
-    ctx.int_master_enabled = false;
+unsafe fn goto_addr(ctx: &mut CpuContext, addr: u16, pushpc: bool) {
+    if check_cond(ctx) {
+        if pushpc {
+            emu_cycles(2);
+            stack_push16(ctx.regs.pc);
+        }
+
+        ctx.regs.pc = addr;
+        emu_cycles(1);
+    }
 }
 
 unsafe fn proc_jp(ctx: &mut CpuContext) {
-    if check_cond(ctx) {
-        ctx.regs.pc = ctx.fetched_data;
-        emu_cycles(1);
-    }
+    goto_addr(ctx, ctx.fetched_data, false);
+}
+
+unsafe fn proc_jr(ctx: &mut CpuContext) {
+    let rel = (ctx.fetched_data as u8) as u16;
+    let addr = ctx.regs.pc + rel;
+    goto_addr(ctx, addr, false);
+}
+
+unsafe fn proc_call(ctx: &mut CpuContext) {
+    goto_addr(ctx, ctx.fetched_data, true);
 }
 
 unsafe fn proc_pop(ctx: &mut CpuContext) {
@@ -152,6 +171,8 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_JP => proc_jp,
         InType::IN_POP => proc_pop,
         InType::IN_PUSH => proc_push,
+        InType::IN_CALL => proc_call,
+        InType::IN_JR => proc_jr,
         InType::IN_DI => proc_di,
         InType::IN_XOR => proc_xor,
         _ => proc_unknown,
