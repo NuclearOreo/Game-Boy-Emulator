@@ -43,7 +43,7 @@ pub unsafe fn bus_read(address: u16) -> u8 {
         //IO Registers...
         //TODO
         panic!("UNSUPPORTED  write read ({:04X})", address);
-    } else if address < 0xFFFF {
+    } else if address == 0xFFFF {
         //CPU ENABLE REGISTER...
         return cpu_get_ie_register();
     }
