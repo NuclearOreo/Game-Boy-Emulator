@@ -136,6 +136,10 @@ unsafe fn proc_call(ctx: &mut CpuContext) {
     goto_addr(ctx, ctx.fetched_data, true);
 }
 
+unsafe fn proc_rst(ctx: &mut CpuContext) {
+    goto_addr(ctx, ctx.cur_inst.param as u16, true);
+}
+
 unsafe fn proc_ret(ctx: &mut CpuContext) {
     if ctx.cur_inst.cond != CondType::CT_NONE {
         emu_cycles(1);
@@ -202,6 +206,7 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_RET => proc_ret,
         InType::IN_RETI => proc_reti,
         InType::IN_XOR => proc_xor,
+        InType::IN_RST => proc_rst,
         _ => proc_unknown,
     }
 }
