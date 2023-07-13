@@ -1,5 +1,3 @@
-use std::num::IntErrorKind;
-
 use super::bus::{bus_read, bus_write, bus_write16};
 use super::common::bit_set;
 use super::cpu::CpuContext;
