@@ -19,7 +19,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["/Users/ussamaazam/Documents/Gameboy_roms/Tetris.gb"],
+            "args": ["/Users/ussamaazam/Desktop/Game-Boy-Emulator/roms/cpu_instrs.gb"],
             "cwd": "${workspaceFolder}"
         },
         {
