@@ -504,7 +504,7 @@ pub unsafe fn set_instructions() {
     };
     INSTRUCTIONS[0x35] = Instruction {
         i_type: InType::IN_DEC,
-        mode: AddrMode::AM_R,
+        mode: AddrMode::AM_MR,
         reg_1: RegType::RT_HL,
         reg_2: RegType::RT_NONE,
         cond: CondType::CT_NONE,

@@ -209,7 +209,41 @@ unsafe fn proc_inc(ctx: &mut CpuContext) {
         return;
     }
 
-    cpu_set_flags(ctx, Some(val == 0), Some(false), Some(val & 0x0F > 0), None)
+    cpu_set_flags(
+        ctx,
+        Some(val == 0),
+        Some(false),
+        Some(val & 0x0F == 0),
+        None,
+    )
+}
+
+unsafe fn proc_dec(ctx: &mut CpuContext) {
+    let mut val = cpu_read_reg(ctx.cur_inst.reg_1) - 1;
+
+    if ctx.cur_inst.reg_1.is_16bit() {
+        emu_cycles(1);
+    }
+
+    if ctx.cur_inst.reg_1 == RegType::RT_HL && ctx.cur_inst.mode == AddrMode::AM_MR {
+        val = bus_read(cpu_read_reg(RegType::RT_HL)) as u16 - 1;
+        bus_write(cpu_read_reg(RegType::RT_HL), val as u8);
+    } else {
+        cpu_set_reg(ctx.cur_inst.reg_1, val);
+        val = cpu_read_reg(ctx.cur_inst.reg_1);
+    }
+
+    if (ctx.cur_opcode & 0x0B) == 0x0B {
+        return;
+    }
+
+    cpu_set_flags(
+        ctx,
+        Some(val == 0),
+        Some(true),
+        Some(val & 0x0F == 0x0F),
+        None,
+    )
 }
 
 pub fn inst_get_processor(i_type: InType) -> InProc {
@@ -229,6 +263,7 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_XOR => proc_xor,
         InType::IN_RST => proc_rst,
         InType::IN_INC => proc_inc,
+        InType::IN_DEC => proc_dec,
         _ => proc_unknown,
     }
 }
