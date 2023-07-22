@@ -8,7 +8,7 @@ use super::stack::{stack_pop, stack_push, stack_push16};
 
 pub type InProc = unsafe fn(&mut CpuContext);
 
-fn proc_none(ctx: &mut CpuContext) {
+fn proc_none(_ctx: &mut CpuContext) {
     panic!("Invalid instructions");
 }
 
@@ -16,7 +16,7 @@ fn proc_unknown(ctx: &mut CpuContext) {
     panic!("Unimplemented proc for instruction: {:02X}", ctx.cur_opcode);
 }
 
-fn proc_nop(ctx: &mut CpuContext) {}
+fn proc_nop(_ctx: &mut CpuContext) {}
 
 unsafe fn proc_di(ctx: &mut CpuContext) {
     ctx.int_master_enabled = false;
@@ -261,8 +261,10 @@ unsafe fn proc_add(ctx: &mut CpuContext) {
 
     let mut z = Some((val & 0xFF) == 0);
     let mut h = Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xF) + (ctx.fetched_data & 0xF) >= 0x10);
-    let mut c =
-        Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xFF) + (ctx.fetched_data & 0xFF) >= 0x100);
+    let mut c = Some(
+        (cpu_read_reg(ctx.cur_inst.reg_1) & 0xFF) as i32 + (ctx.fetched_data & 0xFF) as i32
+            >= 0x100,
+    );
 
     if is_16bit {
         z = None;
@@ -274,7 +276,10 @@ unsafe fn proc_add(ctx: &mut CpuContext) {
     if ctx.cur_inst.reg_1 == RegType::RT_SP {
         z = Some(false);
         h = Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xF) + (ctx.fetched_data & 0xF) >= 0x10);
-        c = Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xFF) + (ctx.fetched_data) & 0xFF >= 0x100);
+        c = Some(
+            (cpu_read_reg(ctx.cur_inst.reg_1) & 0xFF) as i32 + (ctx.fetched_data & 0xFF) as i32
+                >= 0x100,
+        );
     }
 
     cpu_set_reg(ctx.cur_inst.reg_1, val as u16);
@@ -297,6 +302,43 @@ unsafe fn proc_adc(ctx: &mut CpuContext) {
     );
 }
 
+unsafe fn proc_sub(ctx: &mut CpuContext) {
+    let val = cpu_read_reg(ctx.cur_inst.reg_1) + ctx.fetched_data;
+
+    let z = Some(val == 0);
+    let h = Some(
+        (cpu_read_reg(ctx.cur_inst.reg_1) & 0xF) as i32 - ((ctx.fetched_data & 0xF) as i32) < 0,
+    );
+    let c = Some(cpu_read_reg(ctx.cur_inst.reg_1) as i32 - (ctx.fetched_data as i32) < 0);
+
+    cpu_set_reg(ctx.cur_inst.reg_1, val);
+    cpu_set_flags(ctx, z, Some(true), h, c);
+}
+
+unsafe fn proc_sbc(ctx: &mut CpuContext) {
+    let val = (ctx.fetched_data + cpu_flag_c() as u16) as u8;
+
+    let z = Some(cpu_read_reg(ctx.cur_inst.reg_1) - val as u16 == 0);
+
+    let h = Some(
+        (cpu_read_reg(ctx.cur_inst.reg_1) & 0xF) as i32
+            - (ctx.fetched_data & 0xF) as i32
+            - (cpu_flag_c() as i32)
+            < 0,
+    );
+
+    let c = Some(
+        cpu_read_reg(ctx.cur_inst.reg_1) as i32 - ctx.fetched_data as i32 - (cpu_flag_c() as i32)
+            < 0,
+    );
+
+    cpu_set_reg(
+        ctx.cur_inst.reg_1,
+        cpu_read_reg(ctx.cur_inst.reg_1) - val as u16,
+    );
+    cpu_set_flags(ctx, z, Some(true), h, c);
+}
+
 pub fn inst_get_processor(i_type: InType) -> InProc {
     match i_type {
         InType::IN_NONE => proc_none,
@@ -317,6 +359,8 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_DEC => proc_dec,
         InType::IN_ADD => proc_add,
         InType::IN_ADC => proc_adc,
+        InType::IN_SUB => proc_sub,
+        InType::IN_SBC => proc_sbc,
         _ => proc_unknown,
     }
 }
