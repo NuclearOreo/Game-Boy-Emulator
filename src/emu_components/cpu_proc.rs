@@ -281,6 +281,22 @@ unsafe fn proc_add(ctx: &mut CpuContext) {
     cpu_set_flags(ctx, z, Some(false), h, c);
 }
 
+unsafe fn proc_adc(ctx: &mut CpuContext) {
+    let u = ctx.fetched_data as u16;
+    let a = ctx.regs.a as u16;
+    let c = cpu_flag_c() as u16;
+
+    ctx.regs.a = (a + u + c) as u8;
+
+    cpu_set_flags(
+        ctx,
+        Some(ctx.regs.a == 0),
+        Some(false),
+        Some((a & 0xF) + (u & 0xF) + c > 0xF),
+        Some((a + u + c) > 0xFF),
+    );
+}
+
 pub fn inst_get_processor(i_type: InType) -> InProc {
     match i_type {
         InType::IN_NONE => proc_none,
@@ -300,6 +316,7 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_INC => proc_inc,
         InType::IN_DEC => proc_dec,
         InType::IN_ADD => proc_add,
+        InType::IN_ADC => proc_adc,
         _ => proc_unknown,
     }
 }
