@@ -246,6 +246,41 @@ unsafe fn proc_dec(ctx: &mut CpuContext) {
     )
 }
 
+unsafe fn proc_add(ctx: &mut CpuContext) {
+    let mut val = cpu_read_reg(ctx.cur_inst.reg_1) as u32 + ctx.fetched_data as u32;
+
+    let is_16bit = ctx.cur_inst.reg_1.is_16bit();
+
+    if is_16bit {
+        emu_cycles(1);
+    }
+
+    if ctx.cur_inst.reg_1 == RegType::RT_SP {
+        val = cpu_read_reg(ctx.cur_inst.reg_1) as u32 + ctx.fetched_data as u32;
+    }
+
+    let mut z = Some((val & 0xFF) == 0);
+    let mut h = Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xF) + (ctx.fetched_data & 0xF) >= 0x10);
+    let mut c =
+        Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xFF) + (ctx.fetched_data & 0xFF) >= 0x100);
+
+    if is_16bit {
+        z = None;
+        h = Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xFFF) + (ctx.fetched_data & 0xFFF) >= 0x1000);
+        let n = cpu_read_reg(ctx.cur_inst.reg_1) as u32 + ctx.fetched_data as u32;
+        c = Some(n >= 0x1000);
+    }
+
+    if ctx.cur_inst.reg_1 == RegType::RT_SP {
+        z = Some(false);
+        h = Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xF) + (ctx.fetched_data & 0xF) >= 0x10);
+        c = Some((cpu_read_reg(ctx.cur_inst.reg_1) & 0xFF) + (ctx.fetched_data) & 0xFF >= 0x100);
+    }
+
+    cpu_set_reg(ctx.cur_inst.reg_1, val as u16);
+    cpu_set_flags(ctx, z, Some(false), h, c);
+}
+
 pub fn inst_get_processor(i_type: InType) -> InProc {
     match i_type {
         InType::IN_NONE => proc_none,
@@ -264,6 +299,7 @@ pub fn inst_get_processor(i_type: InType) -> InProc {
         InType::IN_RST => proc_rst,
         InType::IN_INC => proc_inc,
         InType::IN_DEC => proc_dec,
+        InType::IN_ADD => proc_add,
         _ => proc_unknown,
     }
 }
